@@ -32,7 +32,7 @@ jobs:
       - name: Docker build
         run: |
           docker login -u ${{ secrets.DOCKER_HUB_USERNAME }} -p ${{ secrets.DOCKER_HUB_PASSWORD }}
-          docker build -t lecture-api . 
+          docker build -t plan-journey . 
           docker tag plan-journey ${{ secrets.DOCKER_NAME }}/plan-journey:${{ github.sha }}
           docker push ${{ secrets.DOCKER_NAME }}/plan-journey:${{ github.sha }}
 
@@ -62,10 +62,10 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            docker pull ${{ secrets.DOCKER_NAME }}/lecture-api:${{ github.sha }}
+            docker pull ${{ secrets.DOCKER_NAME }}/plan_journey:${{ github.sha }}
             docker stop plan_journey_server || true
             docker rm plan_journey_server || true
-            docker run -d --name plan_journey_server -p 8080:8080 ${{ secrets.DOCKER_NAME }}/lecture-api:${{ github.sha }}
+            docker run -d --name plan_journey_server -p 8080:8080 ${{ secrets.DOCKER_NAME }}/plan_journey:${{ github.sha }}
 
       # Remove Github Action IP to Security group
       - name: Remove Github Actions IP to Security group
