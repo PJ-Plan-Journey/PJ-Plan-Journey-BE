@@ -62,10 +62,10 @@ jobs:
           username: ${{ secrets.SERVER_USERNAME }}
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
-            docker pull ${{ secrets.DOCKER_NAME }}/plan_journey:${{ github.sha }}
+            docker pull ${{ secrets.DOCKER_NAME }}/plan-journey:${{ github.sha }}
             docker stop plan_journey_server || true
             docker rm plan_journey_server || true
-            docker run -d --name plan_journey_server -p 8080:8080 ${{ secrets.DOCKER_NAME }}/plan_journey:${{ github.sha }}
+            docker run -d --name plan_journey_server -p 8080:8080 ${{ secrets.DOCKER_NAME }}/plan-journey:${{ github.sha }}
 
       # Remove Github Action IP to Security group
       - name: Remove Github Actions IP to Security group
