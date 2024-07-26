@@ -6,6 +6,8 @@ import com.pj.planjourney.domain.plan.repository.PlanRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 @RequiredArgsConstructor
 public class PlanService {
@@ -30,5 +32,10 @@ public class PlanService {
         Plan plan = planRepository.findById(planId)
                 .orElseThrow(() -> new IllegalArgumentException("Plan not found"));
         return new PlanInfoResponseDto(plan);
+    }
+
+    public List<PlanListResponseDto> getAllPlans() {
+        return planRepository.findAll().stream()
+                .map(PlanListResponseDto::new).toList();
     }
 }

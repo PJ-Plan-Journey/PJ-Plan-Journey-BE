@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/plans")
 @RequiredArgsConstructor
@@ -27,6 +29,11 @@ public class PlanController {
     @GetMapping("/{plansId}")
     public ResponseEntity<PlanInfoResponseDto> getPlan(@PathVariable Long plansId) {
         PlanInfoResponseDto responseDto = planService.getPlan(plansId);
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+    @GetMapping
+    public ResponseEntity<List<PlanListResponseDto>> getAllPlans() {
+        List<PlanListResponseDto> responseDto = planService.getAllPlans();
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 }
