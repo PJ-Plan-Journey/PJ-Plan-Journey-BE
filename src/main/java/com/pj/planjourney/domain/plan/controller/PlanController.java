@@ -1,9 +1,6 @@
 package com.pj.planjourney.domain.plan.controller;
 
-import com.pj.planjourney.domain.plan.dto.PlanCreateRequestDto;
-import com.pj.planjourney.domain.plan.dto.PlanCreateResponseDto;
-import com.pj.planjourney.domain.plan.dto.PlanUpdateTitleRequestDto;
-import com.pj.planjourney.domain.plan.dto.PlanUpdateTitleResponseDto;
+import com.pj.planjourney.domain.plan.dto.*;
 import com.pj.planjourney.domain.plan.service.PlanService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -25,6 +22,11 @@ public class PlanController {
     @PatchMapping("/{plansId}")
     public ResponseEntity<PlanUpdateTitleResponseDto> updatePlanTitle(@PathVariable Long plansId, @RequestBody PlanUpdateTitleRequestDto requestDto) {
         PlanUpdateTitleResponseDto responseDto = planService.updatePlanTitle(plansId, requestDto);
+        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+    }
+    @GetMapping("/{plansId}")
+    public ResponseEntity<PlanInfoResponseDto> getPlan(@PathVariable Long plansId) {
+        PlanInfoResponseDto responseDto = planService.getPlan(plansId);
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
 }

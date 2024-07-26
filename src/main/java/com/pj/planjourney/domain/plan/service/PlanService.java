@@ -1,9 +1,6 @@
 package com.pj.planjourney.domain.plan.service;
 
-import com.pj.planjourney.domain.plan.dto.PlanCreateRequestDto;
-import com.pj.planjourney.domain.plan.dto.PlanCreateResponseDto;
-import com.pj.planjourney.domain.plan.dto.PlanUpdateTitleRequestDto;
-import com.pj.planjourney.domain.plan.dto.PlanUpdateTitleResponseDto;
+import com.pj.planjourney.domain.plan.dto.*;
 import com.pj.planjourney.domain.plan.entity.Plan;
 import com.pj.planjourney.domain.plan.repository.PlanRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,5 +24,11 @@ public class PlanService {
         plan.updatePlan(requestDto);
         Plan updatedPlan = planRepository.save(plan);
         return new PlanUpdateTitleResponseDto(updatedPlan);
+    }
+
+    public PlanInfoResponseDto getPlan(Long planId) {
+        Plan plan = planRepository.findById(planId)
+                .orElseThrow(() -> new IllegalArgumentException("Plan not found"));
+        return new PlanInfoResponseDto(plan);
     }
 }
