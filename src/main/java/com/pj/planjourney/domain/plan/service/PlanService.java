@@ -38,4 +38,8 @@ public class PlanService {
         return planRepository.findAll().stream()
                 .map(PlanListResponseDto::new).toList();
     }
+
+    public void deletePlan(Long planId) {
+        planRepository.deleteById(planId);
+    }
 }

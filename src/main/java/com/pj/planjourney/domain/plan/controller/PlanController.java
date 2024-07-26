@@ -36,4 +36,10 @@ public class PlanController {
         List<PlanListResponseDto> responseDto = planService.getAllPlans();
         return new ResponseEntity<>(responseDto, HttpStatus.OK);
     }
+
+    @DeleteMapping("/{plansId}")
+    public ResponseEntity<Void> deletePlan(@PathVariable Long plansId) {
+        planService.deletePlan(plansId);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
