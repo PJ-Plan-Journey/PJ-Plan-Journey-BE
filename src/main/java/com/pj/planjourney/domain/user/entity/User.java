@@ -40,4 +40,13 @@ public class User extends Timestamped {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Like> likes = new ArrayList<>();
 
+    public User(String email,String password,String nickname){
+        this.email = email;
+        this.password = password;
+        this.nickname = nickname;
+    }
+
+    public User() {
+
+    }
 }
