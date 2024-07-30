@@ -39,14 +39,6 @@ public class UserService {
                 savedUser.getId(),savedUser.getEmail(),savedUser.getNickname(),savedUser.getPassword());
     }
 
-    public SignUpRequestDto updateUser(SignUpRequestDto requestDto) {
-        //토ㄴ큰이 일치하는 이메일 가져와야함
-        //그이메일의 정보를 수정함
-        //그 정보를 저장함
-        Optional<User> checkEmail = userRepository.findByEmail(requestDto.getEmail());
-        if (checkEmail.isPresent()) {
 
-        }
-    }
 
 }
