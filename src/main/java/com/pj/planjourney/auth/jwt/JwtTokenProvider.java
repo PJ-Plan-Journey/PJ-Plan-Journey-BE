@@ -18,10 +18,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.util.Arrays;
-import java.util.Base64;
-import java.util.Collection;
-import java.util.Date;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -53,21 +50,18 @@ public class JwtTokenProvider {
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
 
-
-        //Access Token
         Date accessTokenExpiresIn = new Date((new Date()).getTime() + ACCESS_TOKEN_EXPIRE_TIME);
         String accessToken = Jwts.builder()
                 .setSubject(authentication.getName())
                 .claim(AUTHORITIES_KEY, authorities)
                 .setExpiration(accessTokenExpiresIn)
-                .signWith(key, SignatureAlgorithm.HS512)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
-        //Refresh Token
         Date refreshTokenExpiresIn = new Date((new Date()).getTime() + REFRESH_TOKEN_EXPIRE_TIME);
         String refreshToken = Jwts.builder()
                 .setExpiration(refreshTokenExpiresIn)
-                .signWith(key,SignatureAlgorithm.HS512)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
 
         return JwtTokenDto.builder()
@@ -120,6 +114,21 @@ public class JwtTokenProvider {
         } catch (ExpiredJwtException e) {
             return e.getClaims();
         }
+    }
+
+
+    // 토큰에서 권한 정보 추출하는 메서드
+    public Collection<? extends GrantedAuthority> getAuthoritiesFromToken(String token) {
+        Claims claims = parseClaims(token);
+        String authoritiesClaim = claims.get("auth", String.class);
+
+        if (authoritiesClaim == null) {
+            return Collections.emptyList();
+        }
+
+        return Arrays.stream(authoritiesClaim.split(","))
+                .map(SimpleGrantedAuthority::new)
+                .collect(Collectors.toList());
     }
 
 }

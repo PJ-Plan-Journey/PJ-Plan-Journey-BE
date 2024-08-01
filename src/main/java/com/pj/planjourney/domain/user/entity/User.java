@@ -12,6 +12,7 @@ import org.springframework.data.redis.core.RedisHash;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -40,5 +41,6 @@ public class User extends Timestamped {
     private List<ChildComment> childComments = new ArrayList<>();
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Like> likes = new ArrayList<>();
+
 
 }

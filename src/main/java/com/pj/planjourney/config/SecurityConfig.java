@@ -1,7 +1,9 @@
 package com.pj.planjourney.config;
 
+import com.pj.planjourney.auth.jwt.JwtLoginFilter;
 import com.pj.planjourney.auth.jwt.JwtTokenFilter;
 import com.pj.planjourney.auth.jwt.JwtTokenProvider;
+import com.pj.planjourney.auth.service.UserDetailsServiceImpl;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -17,6 +19,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @RequiredArgsConstructor
 public class SecurityConfig {
     private final JwtTokenProvider jwtTokenProvider;
+    private final UserDetailsServiceImpl userDetailsService;
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -24,7 +27,7 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration) throws Exception {
+    public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration, UserDetailsServiceImpl userDetailsServiceImpl) throws Exception {
         http
                 .csrf((auth) -> auth.disable());
         http
@@ -42,6 +45,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated());
 
         http
+                .addFilterBefore(new JwtLoginFilter(jwtTokenProvider, userDetailsServiceImpl), UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(new JwtTokenFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
