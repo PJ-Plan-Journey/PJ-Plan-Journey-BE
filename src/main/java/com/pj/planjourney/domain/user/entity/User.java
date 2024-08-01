@@ -8,6 +8,7 @@ import com.pj.planjourney.domain.plan.entity.Plan;
 import com.pj.planjourney.global.common.Timestamped;
 import jakarta.persistence.*;
 import lombok.Getter;
+import org.springframework.data.redis.core.RedisHash;
 
 import java.util.ArrayList;
 import java.util.List;
