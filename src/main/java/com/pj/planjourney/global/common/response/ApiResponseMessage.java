@@ -9,6 +9,7 @@ public enum ApiResponseMessage {
     USER_RETRIEVED(HttpStatus.OK, "유저 조회에 성공했습니다."),
     USERS_RETRIEVED(HttpStatus.OK, "유저 목록 조회에 성공했습니다."),
     USER_DELETED(HttpStatus.OK, "회원 삭제에 성공했습니다."),
+    PLAN_DELETED(HttpStatus.OK, "일정 생성에 성공했습니다."),
     SUCCESS(HttpStatus.OK,"성공했습니다.");
 
 
