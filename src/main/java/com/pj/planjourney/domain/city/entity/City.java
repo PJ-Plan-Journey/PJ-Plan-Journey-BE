@@ -9,7 +9,7 @@ import java.util.List;
 
 @Entity
 @Getter
-@Table(name = "cites")
+@Table(name = "cities")
 public class City {
 
     @Id
@@ -22,6 +22,7 @@ public class City {
     private Double latitude;
 
     private Double longitude;
+
     @OneToMany(mappedBy = "city")
     private List<Plan> plans = new ArrayList<>();
 }
