@@ -9,6 +9,12 @@ public enum ApiResponseMessage {
     USER_RETRIEVED(HttpStatus.OK, "유저 조회에 성공했습니다."),
     USERS_RETRIEVED(HttpStatus.OK, "유저 목록 조회에 성공했습니다."),
     USER_DELETED(HttpStatus.OK, "회원 삭제에 성공했습니다."),
+    REQUEST_SENT(HttpStatus.OK, "친구 요청이 전송되었습니다."),
+    REQUEST_ACCEPTED(HttpStatus.OK, "친구 요청이 수락되었습니다."),
+    REQUEST_REJECTED(HttpStatus.OK, "친구 요청이 거절되었습니다."),
+    REQUEST_RETRIEVED(HttpStatus.OK, "친구 요청이 조회되었습니다."),
+    FRIENDS_RETRIEVED(HttpStatus.OK, "친구 목록이 조회되었습니다."),
+    FRIEND_DELETED(HttpStatus.OK, "친구가 삭제되었습니다."),
     SUCCESS(HttpStatus.OK,"성공했습니다.");
 
 
