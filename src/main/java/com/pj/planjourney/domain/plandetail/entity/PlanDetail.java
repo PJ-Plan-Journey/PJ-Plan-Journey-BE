@@ -16,7 +16,7 @@ public class PlanDetail {
     @Column(name = "plan_detail_id")
     private Long id;
 
-    private Integer order;
+    private Integer sequence;
 
     private LocalDate date;
 

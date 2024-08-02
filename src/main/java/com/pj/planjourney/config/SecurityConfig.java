@@ -1,52 +1,76 @@
 package com.pj.planjourney.config;
 
-import com.pj.planjourney.auth.jwt.JwtLoginFilter;
-import com.pj.planjourney.auth.jwt.JwtTokenFilter;
-import com.pj.planjourney.auth.jwt.JwtTokenProvider;
-import com.pj.planjourney.auth.service.UserDetailsServiceImpl;
+import com.pj.planjourney.global.auth.repository.RefreshTokenRepository;
+import com.pj.planjourney.global.auth.service.UserDetailsServiceImpl;
+import com.pj.planjourney.global.jwt.filter.JwtAuthenticationFilter;
+import com.pj.planjourney.global.jwt.filter.JwtAuthorizationFilter;
+import com.pj.planjourney.global.jwt.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 
 @Configuration
+@EnableWebSecurity
 @RequiredArgsConstructor
+@EnableMethodSecurity(securedEnabled = true, prePostEnabled = true)
 public class SecurityConfig {
-    private final JwtTokenProvider jwtTokenProvider;
+
+    private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
+    private final RefreshTokenRepository refreshTokenRepository;
+    private final AuthenticationConfiguration authenticationConfiguration;
 
     @Bean
-    public PasswordEncoder passwordEncoder(){
-        return new BCryptPasswordEncoder();
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();  // PasswordEncoder bean 정의
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http, AuthenticationConfiguration authenticationConfiguration, UserDetailsServiceImpl userDetailsServiceImpl) throws Exception {
-        http
-                .csrf((auth) -> auth.disable());
-        http
-                .formLogin((auth) -> auth.disable());
-        http
-                .httpBasic((auth) -> auth.disable());
-        http
-                .sessionManagement((session) -> session.sessionCreationPolicy(
-                        SessionCreationPolicy.STATELESS));
-        http
-                .authorizeHttpRequests((auth) -> auth
-                        .requestMatchers("/users/login/kakao").permitAll()
-                        .requestMatchers("/users/login").permitAll()
-                        .requestMatchers("/users/").permitAll() //회원가입 ( 회원정보 수정부분 주소 수정 필요)
-                        .anyRequest().authenticated());
+    public JwtAuthorizationFilter jwtAuthorizationFilter() {
+        return new JwtAuthorizationFilter(jwtUtil, userDetailsService);
+    }
 
-        http
-                .addFilterBefore(new JwtLoginFilter(jwtTokenProvider, userDetailsServiceImpl), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(new JwtTokenFilter(jwtTokenProvider), UsernamePasswordAuthenticationFilter.class);
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil, refreshTokenRepository);
+        filter.setAuthenticationManager(authenticationManager()); // 수정
+        return filter;
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager() throws Exception {
+        return authenticationConfiguration.getAuthenticationManager(); // 자동 설정 사용
+    }
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http.csrf(csrf -> csrf.disable());
+
+        // 기본 설정인 Session 방식은 사용하지 않고 JWT 방식을 사용하기 위한 설정
+        http.sessionManagement(sessionManagement ->
+                sessionManagement.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+        );
+
+        http.authorizeHttpRequests(authorizeHttpRequests ->
+                authorizeHttpRequests
+                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                        .requestMatchers("/users/login/kakao", "/users/login", "/users", "/plans").permitAll()
+                        .anyRequest().authenticated() // 인증이 필요한 요청
+        );
+
+        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class); // 수정
+        http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class); // 수정
 
         return http.build();
     }
