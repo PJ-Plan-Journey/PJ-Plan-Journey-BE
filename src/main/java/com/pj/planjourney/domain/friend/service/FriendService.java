@@ -77,8 +77,8 @@ public class FriendService {
     }
 
     @Transactional
-    public void deleteFriend(FriendDeleteDto friendDeleteDto) {
-        User user = getUserById(friendDeleteDto.getUserId());
+    public void deleteFriend(Long userId, FriendDeleteDto friendDeleteDto) {
+        User user = getUserById(userId);
         User friend = userRepository.findById(friendDeleteDto.getFriendId())
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.USER_NOT_FOUND));
 

@@ -6,6 +6,5 @@ import lombok.Setter;
 @Getter
 @Setter
 public class FriendDeleteDto {
-    private Long userId;
     private Long friendId;
 }

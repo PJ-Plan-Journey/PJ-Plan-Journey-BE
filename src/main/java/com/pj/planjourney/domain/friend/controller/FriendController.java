@@ -30,7 +30,7 @@ public class FriendController {
     @GetMapping("/receivedLists")
     public ApiResponse<List<FriendRequestResponseDto>> getReceivedFriendRequests(@RequestHeader Long userId) {
         List<FriendRequestResponseDto> requests = friendService.getReceivedFriendRequests(userId);
-        return new ApiResponse<>(requests, ApiResponseMessage.REQUEST_RETRIEVED);
+        return new ApiResponse<>(requests, ApiResponseMessage.RECEIVED_RETRIEVED);
     }
 
     @PostMapping("/accept/{requestId}")
@@ -52,8 +52,8 @@ public class FriendController {
     }
 
     @DeleteMapping
-    public ApiResponse<Void> deleteFriend(@RequestBody FriendDeleteDto friendDeleteDto) {
-        friendService.deleteFriend(friendDeleteDto);
+    public ApiResponse<Void> deleteFriend(@RequestHeader Long userId, @RequestBody FriendDeleteDto friendDeleteDto) {
+        friendService.deleteFriend(userId, friendDeleteDto);
         return new ApiResponse<>(null, ApiResponseMessage.FRIEND_DELETED);
     }
 }
