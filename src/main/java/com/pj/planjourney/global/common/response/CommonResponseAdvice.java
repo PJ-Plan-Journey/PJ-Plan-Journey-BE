@@ -29,7 +29,6 @@ public class CommonResponseAdvice implements ResponseBodyAdvice<Object> {
             response.setStatusCode(apiResponse.getMessage().getHttpStatus());
             return CommonResponseUtil.success(apiResponse.getData(), apiResponse.getMessage());
         }
-
-        return new ResponseEntity<>(CommonResponseUtil.success(body, ApiResponseMessage.SUCCESS), ApiResponseMessage.SUCCESS.getHttpStatus());
+        return new ResponseEntity<>(CommonResponseUtil.error(body, ApiResponseMessage.ERROR), ApiResponseMessage.ERROR.getHttpStatus());
     }
 }
