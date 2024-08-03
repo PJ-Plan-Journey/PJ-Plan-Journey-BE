@@ -61,9 +61,17 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         String accessToken = jwtUtil.createAccessToken(email, authorities);
         String refreshToken = jwtUtil.createRefreshToken(id);
-        //헤더로 토큰 보내기
-        //리프레시토큰 저장하기
+        // Send tokens in response headers
+        response.setHeader("Authorization", "Bearer " + accessToken);
+        response.setHeader("RefreshToken", refreshToken);
+
+        // Optionally send response body with tokens
+        response.setContentType("application/json");
+        response.getWriter().write("{\"accessToken\":\"" + accessToken + "\", \"refreshToken\":\"" + refreshToken + "\"}");
     }
+
+
+
 
     @Override
     // 추가적인 메세지 관리
