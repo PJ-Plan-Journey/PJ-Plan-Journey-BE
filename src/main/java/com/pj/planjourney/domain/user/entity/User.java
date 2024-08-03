@@ -10,6 +10,8 @@ import com.pj.planjourney.global.common.Timestamped;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import org.springframework.data.redis.core.RedisHash;
+
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -18,6 +20,7 @@ import java.util.Set;
 
 @Entity
 @Getter
+@NoArgsConstructor
 @Table(name = "users")
 @NoArgsConstructor
 public class User extends Timestamped {
@@ -43,10 +46,17 @@ public class User extends Timestamped {
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Like> likes = new ArrayList<>();
+
     @OneToMany(mappedBy = "sender")
     private Set<FriendRequest> sentRequests = new HashSet<>();
     @OneToMany(mappedBy = "receiver")
     private Set<FriendRequest> receivedRequests = new HashSet<>();
     @OneToMany(mappedBy = "user")
     private Set<Friend> friends = new HashSet<>();
+
+
+    public User(String email, String encode, String nickname) {
+        super();
+    }
+
 }
