@@ -8,12 +8,16 @@ import com.pj.planjourney.domain.userPlan.entity.UserPlan;
 import com.pj.planjourney.global.common.Timestamped;
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import org.springframework.data.redis.core.RedisHash;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
+@NoArgsConstructor
 @Table(name = "users")
 public class User extends Timestamped {
     @Id
@@ -45,13 +49,12 @@ public class User extends Timestamped {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
     private List<Like> likes = new ArrayList<>();
 
+
     public User(String email,String password,String nickname){
         this.email = email;
         this.password = password;
         this.nickname = nickname;
     }
 
-    public User() {
 
-    }
 }

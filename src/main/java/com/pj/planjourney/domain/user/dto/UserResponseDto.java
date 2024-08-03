@@ -5,22 +5,15 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class SignUpResponseDto {
+public class UserResponseDto {
     private Long id;
     private String email;
     private String password;
     private String nickname;
 
-
-
-    public SignUpResponseDto(Long id, String email, String nickname, String password) {
-        this.id = id;
-        this.email = email;
-        this.nickname = nickname;
-    }
-
-
 }
+
+
 
 
 
