@@ -1,7 +1,6 @@
 package com.pj.planjourney.domain.user.controller;
 
-import com.pj.planjourney.domain.user.dto.SignUpRequestDto;
-import com.pj.planjourney.domain.user.dto.SignUpResponseDto;
+import com.pj.planjourney.domain.user.dto.*;
 import com.pj.planjourney.domain.user.service.UserService;
 import com.pj.planjourney.global.auth.service.UserDetailsServiceImpl;
 import com.pj.planjourney.global.jwt.filter.JwtAuthenticationFilter;
@@ -11,10 +10,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
@@ -44,6 +41,14 @@ public class UserController {
 
     //회원탈퇴
     //회원정보 수정
+    @PatchMapping("")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<UpdateUserResponseDto> updateNickname(@RequestBody UpdateUserRequestDto requestDto) {
+        UpdateUserResponseDto responseDto = userService.updateNickname(requestDto);
+        return ResponseEntity.ok(responseDto);
+    }
+
+    //비밀번호 변경?해야겟죠
 
 
     //마이페이지

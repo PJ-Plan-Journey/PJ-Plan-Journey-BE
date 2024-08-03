@@ -2,9 +2,14 @@ package com.pj.planjourney.domain.user.service;
 
 import com.pj.planjourney.domain.user.dto.SignUpRequestDto;
 import com.pj.planjourney.domain.user.dto.SignUpResponseDto;
+import com.pj.planjourney.domain.user.dto.UpdateUserRequestDto;
+import com.pj.planjourney.domain.user.dto.UpdateUserResponseDto;
 import com.pj.planjourney.domain.user.entity.User;
 import com.pj.planjourney.domain.user.repository.UserRepository;
+import com.pj.planjourney.global.auth.service.UserDetailsImpl;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -12,6 +17,7 @@ import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class UserService {
 
     private final PasswordEncoder passwordEncoder;
@@ -40,5 +46,21 @@ public class UserService {
     }
 
 
+    public UpdateUserResponseDto updateNickname(UpdateUserRequestDto requestDto) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = userDetails.getUsername();
+        log.info(email);
 
+        User user = userRepository.findByEmail(email).orElseThrow(()->
+                new RuntimeException("user 없음"));
+
+        if(!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
+            throw new RuntimeException("비번 틀림");
+        }
+
+        user.updateNickname(requestDto.getNickname());
+        userRepository.save(user);
+
+        return new UpdateUserResponseDto(user.getNickname());
+    }
 }
