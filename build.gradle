@@ -43,6 +43,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-data-redis'
     //캐시
     implementation 'org.springframework.boot:spring-boot-starter-cache'
+
     //validation
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'

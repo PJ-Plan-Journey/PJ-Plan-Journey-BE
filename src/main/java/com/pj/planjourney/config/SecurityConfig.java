@@ -5,6 +5,7 @@ import com.pj.planjourney.global.auth.service.UserDetailsServiceImpl;
 import com.pj.planjourney.global.jwt.filter.JwtAuthenticationFilter;
 import com.pj.planjourney.global.jwt.filter.JwtAuthorizationFilter;
 import com.pj.planjourney.global.jwt.util.JwtUtil;
+import jakarta.persistence.EntityManager;
 import lombok.RequiredArgsConstructor;
 import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
@@ -30,6 +31,7 @@ public class SecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final RefreshTokenRepository refreshTokenRepository;
     private final AuthenticationConfiguration authenticationConfiguration;
+    private final EntityManager entityManager;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -46,6 +48,11 @@ public class SecurityConfig {
         JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil, refreshTokenRepository);
         filter.setAuthenticationManager(authenticationManager()); // 수정
         return filter;
+    }
+
+    @Bean
+    public EntityManager entityManager() {
+        return entityManager;
     }
 
     @Bean

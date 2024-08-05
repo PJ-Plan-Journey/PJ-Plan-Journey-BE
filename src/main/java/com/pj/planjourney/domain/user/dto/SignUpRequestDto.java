@@ -1,12 +1,12 @@
 package com.pj.planjourney.domain.user.dto;
 
+
 import com.pj.planjourney.domain.user.entity.User;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
-import java.util.Collections;
 
 @Getter
 @Setter
@@ -26,4 +26,6 @@ public class SignUpRequestDto {
     public static User signUp(SignUpRequestDto signUpRequestDto, PasswordEncoder passwordEncoder) {
         return new User(signUpRequestDto.getEmail(), passwordEncoder.encode(signUpRequestDto.getPassword()), signUpRequestDto.getNickname());
     }
+
+
 }
