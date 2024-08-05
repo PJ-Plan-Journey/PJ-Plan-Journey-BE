@@ -3,8 +3,10 @@ package com.pj.planjourney.domain.user.entity;
 import com.pj.planjourney.domain.blacklist.entity.BlackList;
 import com.pj.planjourney.domain.childcomment.entity.ChildComment;
 import com.pj.planjourney.domain.comment.entity.Comment;
-import com.pj.planjourney.domain.follow.entity.Follow;
+import com.pj.planjourney.domain.friend.entity.Friend;
+import com.pj.planjourney.domain.friendrequest.entity.FriendRequest;
 import com.pj.planjourney.domain.like.entity.Like;
+import com.pj.planjourney.domain.notification.entity.Notification;
 import com.pj.planjourney.domain.userPlan.entity.UserPlan;
 import com.pj.planjourney.global.common.Timestamped;
 import jakarta.persistence.*;
@@ -13,6 +15,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.redis.core.RedisHash;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
