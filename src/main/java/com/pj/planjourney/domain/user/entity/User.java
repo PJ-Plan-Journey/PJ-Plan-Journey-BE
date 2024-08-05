@@ -1,11 +1,10 @@
 package com.pj.planjourney.domain.user.entity;
 
+import com.pj.planjourney.domain.blacklist.entity.BlackList;
 import com.pj.planjourney.domain.childcomment.entity.ChildComment;
 import com.pj.planjourney.domain.comment.entity.Comment;
-import com.pj.planjourney.domain.friend.entity.Friend;
-import com.pj.planjourney.domain.friendrequest.entity.FriendRequest;
+import com.pj.planjourney.domain.follow.entity.Follow;
 import com.pj.planjourney.domain.like.entity.Like;
-import com.pj.planjourney.domain.notification.entity.Notification;
 import com.pj.planjourney.domain.userPlan.entity.UserPlan;
 import com.pj.planjourney.global.common.Timestamped;
 import jakarta.persistence.*;
@@ -13,16 +12,14 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.redis.core.RedisHash;
 
-
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 @Entity
 @Getter
-@Table(name = "users")
 @NoArgsConstructor
+@Table(name = "users")
 public class User extends Timestamped {
     @Id
     @Column(name = "user_id")
@@ -56,9 +53,15 @@ public class User extends Timestamped {
     @OneToMany(mappedBy = "user")
     private List<Notification> notifications = new ArrayList<>();
 
+    @OneToOne(mappedBy = "userId", cascade = CascadeType.ALL)
+    private BlackList blackLists;
 
     public User(String email, String encode, String nickname) {
         super();
     }
 
+
+    public void updateNickname(String nickname) {
+        this.nickname = nickname;
+    }
 }

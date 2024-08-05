@@ -1,7 +1,5 @@
 package com.pj.planjourney.domain.user.dto;
 
-
-import com.pj.planjourney.domain.user.entity.User;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -13,22 +11,16 @@ public class SignUpResponseDto {
     private String password;
     private String nickname;
 
-    public SignUpResponseDto(Long id, String email, String nickname) {
+
+
+    public SignUpResponseDto(Long id, String email, String nickname, String password) {
         this.id = id;
         this.email = email;
         this.nickname = nickname;
     }
 
-    public static SignUpResponseDto of(User user) {
-        return new SignUpResponseDto(
-                user.getId(),
-                user.getEmail(),
-                user.getNickname()
-        );
-    }
+
 }
-
-
 
 
 

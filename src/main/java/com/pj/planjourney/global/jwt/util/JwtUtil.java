@@ -28,13 +28,11 @@ public class JwtUtil {
     public static final String BEARER_PREFIX = "Bearer ";
     public static final long ACCESS_TOKEN_TIME = 60 * 60 * 1000L; // 60분
     public static final long REFRESH_TOKEN_TIME = 24 * 60 * 60 * 1000L; // 24시간
-
+    private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
+    private final RefreshTokenRepository refreshTokenRepository;
     @Value("${jwt.secret.key}")
     private String secretKey;
     private Key key;
-    private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
-
-    private final RefreshTokenRepository refreshTokenRepository;
 
     @PostConstruct
     public void init() {
@@ -50,7 +48,7 @@ public class JwtUtil {
 
 
     // 토큰 생성
-    public String createAccessToken(String email,  Collection<? extends GrantedAuthority> authorities)  {
+    public String createAccessToken(String email, Collection<? extends GrantedAuthority> authorities) {
         Date date = new Date();
 
         return BEARER_PREFIX +
