@@ -10,7 +10,7 @@ import com.pj.planjourney.domain.plandetail.dto.CreatePlanDetailRequestDto;
 import com.pj.planjourney.domain.plandetail.entity.PlanDetail;
 import com.pj.planjourney.domain.plandetail.repository.PlanDetailRepository;
 import com.pj.planjourney.domain.user.entity.User;
-import com.pj.planjourney.domain.user.entity.repository.UserRepository;
+import com.pj.planjourney.domain.user.repository.UserRepository;
 import com.pj.planjourney.domain.userPlan.entity.InvitedStatus;
 import com.pj.planjourney.domain.userPlan.entity.UserPlan;
 import com.pj.planjourney.domain.userPlan.repository.UserPlanRepository;

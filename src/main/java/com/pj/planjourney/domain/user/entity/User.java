@@ -5,6 +5,7 @@ import com.pj.planjourney.domain.comment.entity.Comment;
 import com.pj.planjourney.domain.friend.entity.Friend;
 import com.pj.planjourney.domain.friendrequest.entity.FriendRequest;
 import com.pj.planjourney.domain.like.entity.Like;
+import com.pj.planjourney.domain.notification.entity.Notification;
 import com.pj.planjourney.domain.userPlan.entity.UserPlan;
 import com.pj.planjourney.global.common.Timestamped;
 import jakarta.persistence.*;
@@ -20,7 +21,6 @@ import java.util.Set;
 
 @Entity
 @Getter
-@NoArgsConstructor
 @Table(name = "users")
 @NoArgsConstructor
 public class User extends Timestamped {
@@ -53,6 +53,8 @@ public class User extends Timestamped {
     private Set<FriendRequest> receivedRequests = new HashSet<>();
     @OneToMany(mappedBy = "user")
     private Set<Friend> friends = new HashSet<>();
+    @OneToMany(mappedBy = "user")
+    private List<Notification> notifications = new ArrayList<>();
 
 
     public User(String email, String encode, String nickname) {
