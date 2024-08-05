@@ -24,4 +24,11 @@ public class Notification extends Timestamped {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    public Notification(String message, String noticeType, User user) {
+        this.message = message;
+        this.noticeType = noticeType;
+        this.user = user;
+        this.isRead = false;
+    }
 }
