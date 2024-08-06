@@ -53,6 +53,7 @@ public class PlanService {
                 .map(PlanListResponseDto::new).toList();
     }
 
+    // 게시글 삭제 기능
     public void deletePlan(Long planId) {
         planRepository.deleteById(planId);
     }

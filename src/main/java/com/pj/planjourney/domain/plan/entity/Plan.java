@@ -43,7 +43,7 @@ public class Plan extends Timestamped {
     private City city;
     @OneToMany(mappedBy = "plan")
     private List<PlanDetail> planDetails = new ArrayList<>();
-    @OneToMany(mappedBy = "plan")
+    @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Like> likes = new ArrayList<>();
 
     public Plan(PlanCreateRequestDto planCreateRequestDto, User user) {
