@@ -48,7 +48,7 @@ public class Plan extends Timestamped {
 
     public Plan(PlanCreateRequestDto planCreateRequestDto, User user) {
         this.title = planCreateRequestDto.getTitle();
-        this.isPublished = planCreateRequestDto.getIsPublished();
+        this.isPublished = false;
         this.user = user;
     }
 

@@ -47,8 +47,9 @@ public class PlanService {
         return new PlanInfoResponseDto(plan, plan.getCity(), planDetails);
     }
 
+    // isPublished가 true인 게시글 확인
     public List<PlanListResponseDto> getAllPlans() {
-        return planRepository.findAll().stream()
+        return planRepository.findByIsPublishedTrue().stream()
                 .map(PlanListResponseDto::new).toList();
     }
 
