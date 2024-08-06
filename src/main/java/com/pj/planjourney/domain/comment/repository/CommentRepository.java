@@ -8,5 +8,6 @@ import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
-    List<Comment> findByplanId(Long planId);
+    List<Comment> findByPlanId(Long planId);
+
 }

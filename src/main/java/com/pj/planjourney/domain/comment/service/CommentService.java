@@ -34,7 +34,7 @@ public class CommentService {
 
     public List<CommentListResponseDto> getAllComment(Long planId) {
 
-        List<Comment> comments = commentRepository.findByplanId(planId);
+        List<Comment> comments = commentRepository.findByPlanId(planId);
 
         return comments.stream()
                 .map(CommentListResponseDto::new)

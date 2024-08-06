@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.service.annotation.PatchExchange;
 
 import java.util.List;
 
@@ -16,8 +17,8 @@ public class PlanController {
     private final PlanService planService;
 
     @PostMapping
-    public ResponseEntity<PlanCreateResponseDto> createPlan(@RequestBody PlanCreateRequestDto requestDto) {
-        PlanCreateResponseDto responseDto = planService.createPlan(requestDto);
+    public ResponseEntity<PlanCreateResponseDto> createPlan(@RequestHeader Long userId, @RequestBody PlanCreateRequestDto requestDto) {
+        PlanCreateResponseDto responseDto = planService.createPlan(requestDto, userId);
         return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
     }
 

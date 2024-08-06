@@ -46,14 +46,24 @@ public class Plan extends Timestamped {
     @OneToMany(mappedBy = "plan")
     private List<Like> likes = new ArrayList<>();
 
-    public Plan(PlanCreateRequestDto planCreateRequestDto) {
+    public Plan(PlanCreateRequestDto planCreateRequestDto, User user) {
         this.title = planCreateRequestDto.getTitle();
         this.isPublished = planCreateRequestDto.getIsPublished();
+        this.user = user;
+    }
+
+    public Plan(String title, User user) {
+        this.title = title;
+        this.isPublished = false;
+        this.user = user;
     }
 
     public void updatePlan(PlanUpdateTitleRequestDto requestDto) {
         if (requestDto.getTitle() != null) {
             this.title = requestDto.getTitle();
         }
+    }
+    public Integer getLikeCount() {
+        return likes.size();
     }
 }
