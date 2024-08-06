@@ -15,10 +15,10 @@ public class Friend {
     @Column(name = "friend_id")
     private Long id;
     @ManyToOne
-    @JoinColumn(name = "user")
+    @JoinColumn(name = "user_id")
     private User user;
     @ManyToOne
-    @JoinColumn(name = "friend")
+    @JoinColumn(name = "user_friend_id")
     private User friend;
 
     public Friend(User user, User friend) {
