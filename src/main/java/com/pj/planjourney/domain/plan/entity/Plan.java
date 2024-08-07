@@ -3,10 +3,10 @@ package com.pj.planjourney.domain.plan.entity;
 import com.pj.planjourney.domain.city.entity.City;
 import com.pj.planjourney.domain.comment.entity.Comment;
 import com.pj.planjourney.domain.like.entity.Like;
-import com.pj.planjourney.domain.plan.dto.PlanCreateRequestDto;
 import com.pj.planjourney.domain.plan.dto.PlanUpdateTitleRequestDto;
+import com.pj.planjourney.domain.plan.dto.CreatePlanRequestDto;
 import com.pj.planjourney.domain.plandetail.entity.PlanDetail;
-import com.pj.planjourney.domain.user.entity.User;
+import com.pj.planjourney.domain.userPlan.entity.UserPlan;
 import com.pj.planjourney.global.common.Timestamped;
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -20,6 +20,7 @@ import java.util.List;
 @Entity
 @Getter
 @Table(name = "plans")
+@NoArgsConstructor
 public class Plan extends Timestamped {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -32,25 +33,21 @@ public class Plan extends Timestamped {
 
     private LocalDateTime publishedAt;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
-    private User user;
+    @OneToMany(mappedBy = "plan")
+    private List<UserPlan> userPlans = new ArrayList<>();
+
     @OneToMany(mappedBy = "plan")
     private List<Comment> comments = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "city_id")
     private City city;
+
     @OneToMany(mappedBy = "plan")
     private List<PlanDetail> planDetails = new ArrayList<>();
+
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Like> likes = new ArrayList<>();
-
-    public Plan(PlanCreateRequestDto planCreateRequestDto, User user) {
-        this.title = planCreateRequestDto.getTitle();
-        this.isPublished = false;
-        this.user = user;
-    }
 
     public Plan(String title, User user) {
         this.title = title;
@@ -79,5 +76,15 @@ public class Plan extends Timestamped {
         for (PlanDetail planDetail : originalPlan.getPlanDetails()) {
             this.planDetails.add(new PlanDetail(planDetail, this));
         }
+
+    public Plan(CreatePlanRequestDto request, City city) {
+        this.title = request.getTitle();
+        this.isPublished = false;
+        this.city = city;
+    }
+
+    public void addPlanDetail(PlanDetail planDetail) {
+        planDetails.add(planDetail);
+        planDetail.setPlan(this);
     }
 }
