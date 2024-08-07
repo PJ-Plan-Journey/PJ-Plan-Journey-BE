@@ -12,6 +12,7 @@ import com.pj.planjourney.global.common.Timestamped;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import org.springframework.data.redis.core.RedisHash;
 
 import java.util.ArrayList;
@@ -22,6 +23,7 @@ import java.util.Set;
 @Entity
 @Getter
 @NoArgsConstructor
+@Setter
 @Table(name = "users")
 public class User extends Timestamped {
     @Id
@@ -56,15 +58,24 @@ public class User extends Timestamped {
     @OneToMany(mappedBy = "user")
     private List<Notification> notifications = new ArrayList<>();
 
-    @OneToOne(mappedBy = "userId", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private BlackList blackLists;
 
     public User(String email, String encode, String nickname) {
-        super();
+       this.email = email;
+       this.nickname = nickname;
+       this.password = encode;
     }
 
 
     public void updateNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public void deactivateUser(String annoymousEmail, String annoymousNickname, String annoymousPassword) {
+        this.email = annoymousEmail;
+        this.password = annoymousPassword;
+        this.nickname = annoymousNickname;
+
     }
 }
