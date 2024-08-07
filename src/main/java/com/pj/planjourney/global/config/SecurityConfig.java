@@ -1,4 +1,4 @@
-package com.pj.planjourney.config;
+package com.pj.planjourney.global.config;
 
 import com.pj.planjourney.global.auth.repository.RefreshTokenRepository;
 import com.pj.planjourney.global.auth.service.UserDetailsServiceImpl;
