@@ -26,6 +26,6 @@ public class PlanCopyResponseDto {
         this.createdAt = newPlan.getCreatedAt();
         this.planDetails = newPlan.getPlanDetails();
         this.likeCount = newPlan.getLikeCount();
-        this.userId = newPlan.getUser().getId();
+   //     this.userId = newPlan.getUser().getId();
     }
 }

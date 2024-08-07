@@ -25,7 +25,7 @@ public class PlanListResponseDto {
         this.title = plan.getTitle();
         this.isPublished = plan.getIsPublished();
         this.publishedAt = plan.getPublishedAt();
-        this.nickName = plan.getUser().getNickname();
+    //    this.nickName = plan.getUser().getNickname();
         this.createdAt = plan.getCreatedAt();
         this.likeCount = plan.getLikeCount();
 //        this.cityId = plan.getCity().getId();

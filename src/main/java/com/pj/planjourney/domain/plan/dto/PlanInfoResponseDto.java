@@ -31,7 +31,7 @@ public class PlanInfoResponseDto {
         this.title = plan.getTitle();
         this.isPublished = plan.getIsPublished();
         this.publishedAt = plan.getPublishedAt();
-        this.nickName = plan.getUser().getNickname();
+       // this.nickName = plan.getUser().getNickname();
        // this.cityName = city.getName();
         this.planDetails = planDetails;
         this.createAt = LocalDateTime.now();
