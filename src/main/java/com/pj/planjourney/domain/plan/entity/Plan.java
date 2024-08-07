@@ -66,4 +66,18 @@ public class Plan extends Timestamped {
     public Integer getLikeCount() {
         return likes.size();
     }
+    public void publish(Boolean isPublished){
+        this.isPublished = true;
+    }
+
+    public Plan(Plan originalPlan, User user) {
+        this.title = originalPlan.getTitle();
+        this.isPublished = false;
+      //  this.city = originalPlan.getCity();
+        this.user = user;
+        this.publishedAt = null;
+        for (PlanDetail planDetail : originalPlan.getPlanDetails()) {
+            this.planDetails.add(new PlanDetail(planDetail, this));
+        }
+    }
 }

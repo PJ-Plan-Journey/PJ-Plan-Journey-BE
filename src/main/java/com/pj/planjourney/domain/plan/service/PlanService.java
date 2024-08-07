@@ -57,4 +57,25 @@ public class PlanService {
     public void deletePlan(Long planId) {
         planRepository.deleteById(planId);
     }
+
+    // 내 일정 publish 하기
+    public void publishPlan(Long planId, Long userId) {
+        Plan plan = planRepository.findById(planId)
+                .orElseThrow(() -> new IllegalArgumentException("Plan not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+        plan.publish(true);
+        planRepository.save(plan);
+    }
+    // 다른 사람 일정 복사해서 가져오기
+    public PlanCopyResponseDto copyPlan(Long planId, Long userId) {
+        Plan originalPlan = planRepository.findById(planId)
+                .orElseThrow(() -> new IllegalArgumentException("Plan not found"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        Plan newPlan = new Plan(originalPlan, user);
+
+        return new PlanCopyResponseDto(planRepository.save(newPlan));
+    }
 }
