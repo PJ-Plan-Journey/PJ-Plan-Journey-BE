@@ -1,7 +1,6 @@
 package com.pj.planjourney.domain.plandetail.config;
 
 import com.pj.planjourney.domain.plandetail.service.RedisSubscriberPlanUpdates;
-import com.pj.planjourney.domain.plandetail.service.RedisSubscriberUserInvites;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -50,13 +49,11 @@ public class RedisConfig {
      * Redis 의 channel 로부터 메시지를 수신받아 해당 MessageListenerAdapter 에게 디스패치
      */
     @Bean
-    public RedisMessageListenerContainer redisContainer(MessageListenerAdapter messageListenerPlanUpdates,
-                                                        MessageListenerAdapter messageListenerUserInvites) {
+    public RedisMessageListenerContainer redisContainer(MessageListenerAdapter messageListenerPlanUpdates) {
         final RedisMessageListenerContainer container = new RedisMessageListenerContainer();
 
         container.setConnectionFactory(redisConnectionFactory());
         container.addMessageListener(messageListenerPlanUpdates, new ChannelTopic("planUpdates"));
-//        container.addMessageListener(messageListenerUserInvites(), new ChannelTopic("userInvites"));
 
         return container;
     }
@@ -69,9 +66,4 @@ public class RedisConfig {
     public MessageListenerAdapter messageListenerPlanUpdates(RedisSubscriberPlanUpdates redisSubscriberPlanUpdates) {
         return new MessageListenerAdapter(redisSubscriberPlanUpdates);
     }
-
-//    @Bean
-//    public MessageListenerAdapter messageListenerUserInvites() {
-//        return new MessageListenerAdapter(new RedisSubscriberUserInvites());
-//    }
 }
