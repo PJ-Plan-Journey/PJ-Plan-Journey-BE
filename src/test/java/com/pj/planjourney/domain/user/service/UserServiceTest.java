@@ -1,55 +1,65 @@
 package com.pj.planjourney.domain.user.service;
 
-
-import com.pj.planjourney.domain.blacklist.entity.BlackList;
-import com.pj.planjourney.domain.blacklist.repository.BlackListRepository;
+import com.pj.planjourney.domain.user.dto.SignUpRequestDto;
+import com.pj.planjourney.domain.user.dto.SignUpResponseDto;
 import com.pj.planjourney.domain.user.entity.User;
 import com.pj.planjourney.domain.user.repository.UserRepository;
-import com.pj.planjourney.domain.user.service.UserService;
+import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.TestInstance;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import java.time.LocalDateTime;
+import org.springframework.security.crypto.password.PasswordEncoder;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+
 @SpringBootTest
-public class UserServiceTest {
+@TestInstance(TestInstance.Lifecycle.PER_CLASS)
+class UserServiceTest {
 
     @Autowired
-    private UserService userService;
-
+    UserService userService;
     @Autowired
-    private UserRepository userRepository;
-
+    UserRepository userRepository;
     @Autowired
-    private BlackListRepository blackListRepository;
+    PasswordEncoder encoder;
+
+    User user;
+    SignUpResponseDto responseDto = null;
+
 
     @Test
-    public void testDeactivateUser() {
-        // Create a user
-        User user = new User();
-        user.setEmail("test@example.com");
-        user.setNickname("testuser");
-        user.setPassword("password");
-        userRepository.save(user);
+    @DisplayName("회원가입")
+    void SignUpTest() {
+        // given
+        String email = "pj1@email.com";
+        String password = "pj1234";
+        String nickname = "짱PJ1";
 
-        // Add user to blacklist
-        BlackList blackList = new BlackList();
-        blackList.setUser(user);
-        blackList.setDeletedAt(LocalDateTime.now());
-        blackList.setValidAt(LocalDateTime.now().plusMinutes(1));
-        blackListRepository.save(blackList);
 
-        // Deactivate user
-        userService.deactivateUser("test@example.com");
+        SignUpRequestDto requestDto = new SignUpRequestDto(
+                email,
+                password,
+                nickname
+        );
 
-        // Check if user is deactivated
-        User deactivatedUser = userRepository.findByEmail("annoymous" + user.getId() + "@email.com").orElse(null);
-        assertNotNull(deactivatedUser);
+        // when
+        SignUpResponseDto responseDto = userService.signUp(requestDto);
 
-        // Check if user is removed from blacklist
-        BlackList removedFromBlackList = blackListRepository.findById(blackList.getId()).orElse(null);
-        assertNull(removedFromBlackList);
+        // then
+        assertNotNull(responseDto);
+        assertEquals(email, responseDto.getEmail());
+        assertEquals(nickname, responseDto.getNickname());
+
+        Optional<User> savedUserOptional = userRepository.findByEmail(email);
+        assertTrue(savedUserOptional.isPresent());
+
+        User savedUser = savedUserOptional.get();
+        assertEquals(email, savedUser.getEmail());
+        assertEquals(nickname, savedUser.getNickname());
+        assertTrue(encoder.matches(password, savedUser.getPassword())); // Ensure the password is encoded and saved
     }
 }
