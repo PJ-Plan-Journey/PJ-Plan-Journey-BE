@@ -31,4 +31,8 @@ public class Notification extends Timestamped {
         this.user = user;
         this.isRead = false;
     }
+
+    public void markAsRead() {
+        this.isRead = true;
+    }
 }
