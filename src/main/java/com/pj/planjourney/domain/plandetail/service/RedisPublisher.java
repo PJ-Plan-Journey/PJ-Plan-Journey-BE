@@ -10,13 +10,13 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class RedisPublisher {
 
-    private final RedisTemplate<String, Object> redisTemplate;
+    private final RedisTemplate<String, Object> pubSubRedisTemplate;
     private final ObjectMapper objectMapper;
 
-    public void publish(String topic, EditPlanDetailResponseDto message) {
+    public void publish(EditPlanDetailResponseDto message) {
         try {
             String response = objectMapper.writeValueAsString(message);
-            redisTemplate.convertAndSend("planUpdates", response);
+            pubSubRedisTemplate.convertAndSend("planUpdates", response);
         } catch (Exception e) {
             e.printStackTrace();
         }
