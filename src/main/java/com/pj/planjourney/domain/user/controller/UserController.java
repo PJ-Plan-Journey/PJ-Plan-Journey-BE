@@ -2,19 +2,26 @@ package com.pj.planjourney.domain.user.controller;
 
 import com.pj.planjourney.domain.user.dto.*;
 import com.pj.planjourney.domain.user.service.UserService;
+import com.pj.planjourney.global.auth.service.UserDetailsImpl;
 import com.pj.planjourney.global.auth.service.UserDetailsServiceImpl;
+import com.pj.planjourney.global.common.response.ApiResponse;
+import com.pj.planjourney.global.common.response.ApiResponseMessage;
 import com.pj.planjourney.global.jwt.filter.JwtAuthenticationFilter;
 import com.pj.planjourney.global.jwt.util.JwtUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 
+@Slf4j
 @RestController
 @RequestMapping("/users")
 @RequiredArgsConstructor
@@ -56,19 +63,18 @@ public class UserController {
 
     //로그인
     @PostMapping("/login")
-    public void login(HttpServletRequest request, HttpServletResponse response) throws IOException {
+    public ApiResponse<UserResponseDto> login(HttpServletRequest request, HttpServletResponse response) {
         // JwtAuthenticationFilter의 attemptAuthentication 메서드 호출
         jwtAuthenticationFilter.attemptAuthentication(request, response);
 
-        // JWT 발급 후 성공적인 인증 처리
-        try {
-            jwtAuthenticationFilter.successfulAuthentication(request, response, null, null);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        } catch (ServletException e) {
-            throw new RuntimeException(e);
-        }
+        // 사용자 정보를 포함한 응답 반환
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        UserResponseDto userResponseDto = new UserResponseDto(userDetails.getUser().getId(), userDetails.getUsername(), userDetails.getUser().getNickname());
+        return new ApiResponse<>(null, ApiResponseMessage.USER_LOGIN);
     }
+
+
+
 
 }
 
