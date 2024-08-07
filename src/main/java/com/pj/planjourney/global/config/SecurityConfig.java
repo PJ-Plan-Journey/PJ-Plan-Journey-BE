@@ -72,7 +72,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(authorizeHttpRequests ->
                 authorizeHttpRequests
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                        .requestMatchers("/users/login/kakao", "/users/login", "/users", "/plans").permitAll()
+                        .requestMatchers("/users/login/kakao", "/users/login", "/users", "/plans", "/ws/**").permitAll()
                         .anyRequest().authenticated() // 인증이 필요한 요청
         );
 
