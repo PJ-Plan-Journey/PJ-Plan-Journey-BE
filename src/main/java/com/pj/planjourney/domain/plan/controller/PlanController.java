@@ -3,6 +3,8 @@ package com.pj.planjourney.domain.plan.controller;
 import com.pj.planjourney.domain.plan.dto.*;
 import com.pj.planjourney.domain.plan.entity.Plan;
 import com.pj.planjourney.domain.plan.service.PlanService;
+import com.pj.planjourney.global.common.response.ApiResponse;
+import com.pj.planjourney.global.common.response.ApiResponseMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,9 +19,10 @@ public class PlanController {
     private final PlanService planService;
 
     @PostMapping
-    public ResponseEntity<PlanCreateResponseDto> createPlan(@RequestHeader Long userId, @RequestBody PlanCreateRequestDto requestDto) {
-        PlanCreateResponseDto responseDto = planService.createPlan(requestDto, userId);
-        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+    public ApiResponse<CreatePlanResponseDto> savePlan(@RequestHeader("USERID") Long userId,
+                                                       @RequestBody CreatePlanRequestDto request) {
+        CreatePlanResponseDto response = planService.save(userId, request);
+        return new ApiResponse<>(response, ApiResponseMessage.PLAN_DELETED);
     }
 
     @PatchMapping("/{planId}")

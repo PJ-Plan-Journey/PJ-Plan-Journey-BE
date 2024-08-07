@@ -12,7 +12,6 @@ import java.time.LocalDate;
 @Getter
 @NoArgsConstructor
 @Table(name = "plan_details")
-@NoArgsConstructor
 public class PlanDetail {
 
     @Id
@@ -38,9 +37,10 @@ public class PlanDetail {
         this.plan = newPlan;
         this.sequence = original.getSequence();
         this.date = original.getDate();
-        this.name = original.getName();
+        this.placeName = original.getPlaceName();
         this.latitude = original.getLatitude();
         this.longitude = original.getLongitude();
+    }
 
     public PlanDetail(Integer sequence, LocalDate date, String placeName, Double latitude, Double longitude, Plan plan) {
         this.sequence = sequence;
