@@ -1,4 +1,4 @@
-package com.pj.planjourney.config;
+package com.pj.planjourney.global.config;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
