@@ -16,7 +16,8 @@ public class EditPlanDetailResponseDto {
     private Long planId;
     private final Map<LocalDate, List<PlanDetailDto>> groupedByDate = new HashMap<>();
 
-    public EditPlanDetailResponseDto(List<PlanDetailDto> planDetails) {
+    public EditPlanDetailResponseDto(List<PlanDetailDto> planDetails, Long planId) {
+        this.planId = planId;
         for (PlanDetailDto detail : planDetails) {
             groupedByDate.computeIfAbsent(detail.getDate(), k -> new ArrayList<>()).add(detail);
         }

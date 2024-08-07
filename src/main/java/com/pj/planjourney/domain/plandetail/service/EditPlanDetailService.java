@@ -32,7 +32,7 @@ public class EditPlanDetailService {
         } else if (request.getType() == EditPlanType.DELETE) {
             planDetails = deletePlan(request);
         }
-        return new EditPlanDetailResponseDto(planDetails);
+        return new EditPlanDetailResponseDto(planDetails, request.getPlanId());
     }
 
     public List<PlanDetailDto> insertPlan(EditPlanDetailRequestDto request) {
