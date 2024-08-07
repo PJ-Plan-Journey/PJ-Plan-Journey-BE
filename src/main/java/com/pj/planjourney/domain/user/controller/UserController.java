@@ -47,6 +47,28 @@ public class UserController {
 
 
     //회원탈퇴
+    @PostMapping("/signout")
+    @PreAuthorize(("isAuthenticated()"))
+    public ResponseEntity<?> signOut(@RequestBody SignOutRequestDto requestDto) {
+        SignOutResponseDto responseDto = userService.signOut(requestDto);
+        return ResponseEntity.ok(responseDto);
+    }
+    //회원탈퇴 - 탈퇴
+    @PostMapping("/{email}")
+    public ResponseEntity<?> deactivateUser(@PathVariable String email) {
+        userService.deactivateUser(email);
+        return ResponseEntity.ok("삭제됨");
+    }
+
+
+    //회원탈퇴 - 철회
+    @PostMapping("/cancel-deactivation")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> cancelDeactivation(@RequestBody DeactivateUserRequestDto requestDto) {
+        userService.cancelDeactivation(requestDto);
+        return ResponseEntity.ok("철회됨");
+    }
+
     //회원정보 수정
     @PatchMapping("")
     @PreAuthorize("isAuthenticated()")
@@ -70,7 +92,8 @@ public class UserController {
         // 사용자 정보를 포함한 응답 반환
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         UserResponseDto userResponseDto = new UserResponseDto(userDetails.getUser().getId(), userDetails.getUsername(), userDetails.getUser().getNickname());
-        return new ApiResponse<>(null, ApiResponseMessage.USER_LOGIN);
+        String message= ApiResponseMessage.USER_LOGIN.getMessage();
+        return new ApiResponse<>(null, message);
     }
 
 

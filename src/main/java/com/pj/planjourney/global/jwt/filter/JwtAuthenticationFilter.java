@@ -2,8 +2,12 @@ package com.pj.planjourney.global.jwt.filter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.pj.planjourney.domain.user.dto.LoginRequestDto;
+import com.pj.planjourney.domain.user.dto.DeactivateUserResponseDto;
+import com.pj.planjourney.domain.user.dto.UserResponseDto;
 import com.pj.planjourney.global.auth.repository.RefreshTokenRepository;
 import com.pj.planjourney.global.auth.service.UserDetailsImpl;
+import com.pj.planjourney.global.common.response.ApiResponse;
+import com.pj.planjourney.global.common.response.ApiResponseMessage;
 import com.pj.planjourney.global.jwt.util.JwtUtil;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -18,7 +22,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 import java.io.IOException;
 import java.util.Collection;
-import java.util.List;
 
 @Slf4j(topic = "로그인 및 JWT 생성")
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
@@ -61,16 +64,24 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         String accessToken = jwtUtil.createAccessToken(email, authorities);
         String refreshToken = jwtUtil.createRefreshToken(id);
-        // Send tokens in response headers
+
+        // 헤더에 토큰 추가
         response.setHeader("Authorization", "Bearer " + accessToken);
         response.setHeader("RefreshToken", refreshToken);
 
-        // Optionally send response body with tokens
-        response.setContentType("application/json");
-        response.getWriter().write("{\"accessToken\":\"" + accessToken + "\", \"refreshToken\":\"" + refreshToken + "\"}");
+        // 사용자 정보를 포함한 JSON 객체 생성
+        UserResponseDto userResponseDto = new UserResponseDto(userDetails.getUser().getId(), userDetails.getUsername(), userDetails.getUser().getNickname());
+        ApiResponse<UserResponseDto> apiResponse = new ApiResponse<>(userResponseDto, ApiResponseMessage.USER_LOGIN);
+
+        // 응답 본문에 사용자 정보 JSON 객체 추가
+        ObjectMapper objectMapper = new ObjectMapper();
+        String responseJson = objectMapper.writeValueAsString(apiResponse);
+
+        response.setContentType("application/json; charset=UTF-8");
+        response.setCharacterEncoding("UTF-8");
+        response.setStatus(HttpServletResponse.SC_OK);
+        response.getWriter().write(responseJson);
     }
-
-
 
 
     @Override
