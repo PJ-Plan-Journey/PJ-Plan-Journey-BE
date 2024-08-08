@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BlackListRepository extends JpaRepository<BlackList, Long> {
-    void deleteByUser_Id(Long id);
+    void deleteByUserId(Long userId);
     Optional<BlackList> findByUserId(Long id);
 
     List<BlackList> findByValidAtBefore(LocalDateTime tenDaysAgo);

@@ -1,7 +1,7 @@
 package com.pj.planjourney.global.config;
 
-import com.pj.planjourney.global.auth.repository.RefreshTokenRepository;
 import com.pj.planjourney.global.auth.service.UserDetailsServiceImpl;
+import com.pj.planjourney.global.jwt.JwtAuthenticationProvider;
 import com.pj.planjourney.global.jwt.filter.JwtAuthenticationFilter;
 import com.pj.planjourney.global.jwt.filter.JwtAuthorizationFilter;
 import com.pj.planjourney.global.jwt.util.JwtUtil;
@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -19,7 +20,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
+
+import static org.springframework.security.config.Customizer.withDefaults;
 
 @Configuration
 @EnableWebSecurity
@@ -29,7 +31,6 @@ public class SecurityConfig {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
-    private final RefreshTokenRepository refreshTokenRepository;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final EntityManager entityManager;
 
@@ -45,8 +46,11 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(jwtUtil, refreshTokenRepository);
-        filter.setAuthenticationManager(authenticationManager()); // 수정
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(authenticationManager(), jwtUtil);
+        filter.setFilterProcessesUrl("/login");
+        filter.setAuthenticationSuccessHandler(userAuthenticationSuccessHandler());
+        filter.afterPropertiesSet();
+        filter.setAuthenticationManager(authenticationManager());
         return filter;
     }
 
@@ -63,6 +67,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable());
+        http.cors(withDefaults());
 
         // 기본 설정인 Session 방식은 사용하지 않고 JWT 방식을 사용하기 위한 설정
         http.sessionManagement(sessionManagement ->
@@ -72,7 +77,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(authorizeHttpRequests ->
                 authorizeHttpRequests
                         .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
-                        .requestMatchers("/users/login/kakao", "/users/login", "/users", "/plans", "/ws/**").permitAll()
+                        .requestMatchers("/users/login/kakao", "/users/login", "/users", "/plans").permitAll()
                         .anyRequest().authenticated() // 인증이 필요한 요청
         );
 
@@ -80,5 +85,15 @@ public class SecurityConfig {
         http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class); // 수정
 
         return http.build();
+    }
+
+    @Bean
+    public UserAuthenticationSuccessHandler userAuthenticationSuccessHandler() {
+        return new UserAuthenticationSuccessHandler();
+    }
+
+    @Bean
+    public JwtAuthenticationProvider jwtAuthenticationProvider() {
+        return new JwtAuthenticationProvider(passwordEncoder());
     }
 }

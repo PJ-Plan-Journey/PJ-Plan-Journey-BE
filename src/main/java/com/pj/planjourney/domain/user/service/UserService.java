@@ -2,7 +2,9 @@ package com.pj.planjourney.domain.user.service;
 
 import com.pj.planjourney.domain.blacklist.entity.BlackList;
 import com.pj.planjourney.domain.blacklist.repository.BlackListRepository;
+import com.pj.planjourney.domain.blacklist.service.BlackListService;
 import com.pj.planjourney.domain.user.dto.*;
+import com.pj.planjourney.domain.user.entity.Role;
 import com.pj.planjourney.domain.user.entity.User;
 import com.pj.planjourney.domain.user.repository.UserRepository;
 import com.pj.planjourney.global.auth.service.UserDetailsImpl;
@@ -23,6 +25,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final BlackListRepository blackListRepository;
+    private final BlackListService blackListService;
 
     //회원가입
     public SignUpResponseDto signUp(SignUpRequestDto requestDto) {
@@ -30,6 +33,7 @@ public class UserService {
         String email = requestDto.getEmail();
         String password = passwordEncoder.encode(requestDto.getPassword());
         String nickname = requestDto.getNickname();
+        Role role = requestDto.getRole();
 
         Optional<User> checkEmail = userRepository.findByEmail(email);
         if (checkEmail.isPresent()) {
@@ -41,12 +45,13 @@ public class UserService {
             throw new IllegalArgumentException("이미 존재하는 닉네임입니다.");
         }
 
-        User user = new User(email, password, nickname);
+        User user = new User(email, password, nickname, role);
         User savedUser = userRepository.save(user);
         return new SignUpResponseDto(
                 savedUser.getId(),
                 savedUser.getEmail(),
-                savedUser.getNickname());
+                savedUser.getNickname(),
+                savedUser.getRole().getAuthority());
     }
 
 
@@ -107,26 +112,26 @@ public class UserService {
 
         user.deactivateUser(annoymousEmail, annoymousNickname, annoymousPassword);
         userRepository.save(user);
-        log.info(user.getId().toString());
-        try {
-            blackListRepository.deleteByUser_Id(user.getId());
-            log.info("User with email {} deactivated and removed from blacklist", email);
-        } catch (Exception e) {
-            log.error("Error removing user from blacklist: {}", e.getMessage());
-        }
+//        try {
+//            blackListService.deleteUser(user.getId());
+//            log.info("User with email {} deactivated and removed from blacklist", user.getId());
+//        } catch (Exception e) {
+//            log.error("Error removing user from blacklist: {}", e.getMessage());
+//        }
 
         // 공통응답포맷 적용해야함
         return new DeactivateUserResponseDto(user.getId(), user.getEmail(), user.getNickname(), user.getPassword());
     }
 
     //회원 탈퇴 - 철회
-    public void cancelDeactivation(DeactivateUserRequestDto requestDto){
-        Optional<BlackList> checkedBlackList = blackListRepository.findByUserId(requestDto.getUser().getId());
+    public void cancelDeactivation(Long userId){
+        Optional<BlackList> checkedBlackList = blackListRepository.findByUserId(userId);
         if(!checkedBlackList.isPresent()){
-            throw new IllegalArgumentException("없음.");
+//            throw new IllegalArgumentException("없음.");
+            return; // ??? 블랙리스트에 없으면 철회안해도되는건가요? 넹
         }
         // 삭제 확인
-        Optional<BlackList> deletedEntry = blackListRepository.findByUserId(requestDto.getUser().getId());
+        Optional<BlackList> deletedEntry = blackListRepository.findByUserId(userId);
 
         if (deletedEntry.isPresent()) {
             throw new IllegalStateException("사용자 삭제 실패");

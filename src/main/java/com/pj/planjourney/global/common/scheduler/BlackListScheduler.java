@@ -17,11 +17,13 @@ public class BlackListScheduler {
 
     private final BlackListRepository blacklistRepository;
     private final UserService userService;
+    private final BlackListService blackListService;
 
     // 생성자를 통해 의존성 주입
-    public BlackListScheduler(BlackListRepository blacklistRepository, UserService userService) {
+    public BlackListScheduler(BlackListRepository blacklistRepository, UserService userService, BlackListService blackListService) {
         this.blacklistRepository = blacklistRepository;
         this.userService = userService;
+        this.blackListService = blackListService;
     }
 
     @Scheduled(fixedRate = 100000)
@@ -38,7 +40,7 @@ public class BlackListScheduler {
             String email = blacklist.getUser().getEmail();
             log.info("Processing blacklist for user with email: {}", email);
             userService.deactivateUser(email);  // 익명화 처리
-            blacklistRepository.delete(blacklist);  // 블랙리스트에서 제거
+//            blackListService.deleteUser(blacklist.getUser().getId());  // 블랙리스트에서 제거
             log.info("Blacklist for user with email {} processed and deleted", email);
         }
     }

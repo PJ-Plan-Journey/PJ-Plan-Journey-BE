@@ -29,4 +29,16 @@ public class BlackListService {
             throw new IllegalStateException("사용자 삭제 실패");
         }
     }
+
+//    @Transactional
+//    public void deleteUser(Long userId) {
+//        try {
+//            blackListRepository.deleteByUserId(userId);
+//            log.info("BlackList entry for userId {} has been deleted.", userId);
+//        } catch (Exception e) {
+//            log.error("Error deleting BlackList entry for userId {}: {}", userId, e.getMessage());
+//            throw e; // Optional: Rethrow or handle accordingly
+//        }
+//    }
+
 }

@@ -16,7 +16,7 @@ import java.time.LocalDateTime;
 @Getter
 @NoArgsConstructor
 @Setter
-@Table(name = "black_lists") // s붙일지말지
+@Table(name = "black_lists")
 public class BlackList {
 
     @Id
