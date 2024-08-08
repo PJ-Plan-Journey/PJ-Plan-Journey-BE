@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -47,6 +48,28 @@ public class UserController {
 
 
     //회원탈퇴
+    @PostMapping("/signout")
+    @PreAuthorize(("isAuthenticated()"))
+    public ResponseEntity<?> signOut(@RequestBody SignOutRequestDto requestDto) {
+        SignOutResponseDto responseDto = userService.signOut(requestDto);
+        return ResponseEntity.ok(responseDto);
+    }
+    //회원탈퇴 - 탈퇴
+    @PostMapping("/{email}")
+    public ResponseEntity<?> deactivateUser(@PathVariable String email) {
+        userService.deactivateUser(email);
+        return ResponseEntity.ok("삭제됨");
+    }
+
+
+    //회원탈퇴 - 철회
+    @PostMapping("/cancel-deactivation")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> cancelDeactivation(@RequestBody DeactivateUserRequestDto requestDto) {
+        userService.cancelDeactivation(requestDto.getUser().getId());
+        return ResponseEntity.ok("철회됨");
+    }
+
     //회원정보 수정
     @PatchMapping("")
     @PreAuthorize("isAuthenticated()")
@@ -61,17 +84,36 @@ public class UserController {
     //마이페이지
 
 
-    //로그인
     @PostMapping("/login")
-    public ApiResponse<UserResponseDto> login(HttpServletRequest request, HttpServletResponse response) {
-        // JwtAuthenticationFilter의 attemptAuthentication 메서드 호출
-        jwtAuthenticationFilter.attemptAuthentication(request, response);
+    public ResponseEntity<ApiResponse<UserResponseDto>> login(HttpServletRequest request, HttpServletResponse response) {
+        try {
+            // 인증 시도
+            Authentication authentication = jwtAuthenticationFilter.attemptAuthentication(request, response);
 
-        // 사용자 정보를 포함한 응답 반환
-        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        UserResponseDto userResponseDto = new UserResponseDto(userDetails.getUser().getId(), userDetails.getUsername(), userDetails.getUser().getNickname());
-        return new ApiResponse<>(null, ApiResponseMessage.USER_LOGIN);
+            if (authentication != null && authentication.getPrincipal() instanceof UserDetailsImpl) {
+                UserDetailsImpl userDetails = (UserDetailsImpl) authentication.getPrincipal();
+
+                // 인증 후 JWT 토큰 생성 및 응답 헤더에 추가
+                jwtAuthenticationFilter.successfulAuthentication(request, response, null, authentication);
+
+                UserResponseDto userResponseDto = new UserResponseDto(
+                        userDetails.getUser().getId(),
+                        userDetails.getUsername(),
+                        userDetails.getUser().getNickname()
+                );
+
+                return ResponseEntity.ok(new ApiResponse<>(userResponseDto, ApiResponseMessage.USER_LOGIN));
+            } else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(new ApiResponse<>(null, ApiResponseMessage.ERROR));
+            }
+        } catch (Exception e) {
+            log.error("Login failed", e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(new ApiResponse<>(null, ApiResponseMessage.ERROR));
+        }
     }
+
 
 
 

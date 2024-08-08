@@ -13,7 +13,6 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.springframework.data.redis.core.RedisHash;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -36,6 +35,9 @@ public class User extends Timestamped {
     private String password;
 
     private String nickname;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = false, fetch = FetchType.LAZY)
     private List<UserPlan> userPlans = new ArrayList<>();  // 유저가 삭제되어도 게시글은 남아있다. 이 분분 유저 정보가 없는데 어떻게 처리할지
@@ -61,10 +63,11 @@ public class User extends Timestamped {
     @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private BlackList blackLists;
 
-    public User(String email, String encode, String nickname) {
+    public User(String email, String encode, String nickname, Role role) {
        this.email = email;
        this.nickname = nickname;
        this.password = encode;
+       this.role = role;
     }
 
 
