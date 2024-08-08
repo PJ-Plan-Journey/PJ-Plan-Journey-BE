@@ -39,9 +39,9 @@ public class UserController {
 
     //회원가입
     @PostMapping("")
-    public ResponseEntity<?> signUp(@RequestBody SignUpRequestDto requestDto) {
+    public ResponseEntity<ApiResponse<SignUpResponseDto>> signUp(@RequestBody SignUpRequestDto requestDto) {
         SignUpResponseDto responseDto = userService.signUp(requestDto);
-        return ResponseEntity.ok(responseDto);
+        return ResponseEntity.ok(new ApiResponse<>(responseDto, ApiResponseMessage.USER_CREATED));
     }
 
     //카카오 로그인
@@ -66,6 +66,7 @@ public class UserController {
         SignOutResponseDto responseDto = userService.signOut(requestDto);
         return ResponseEntity.ok(responseDto);
     }
+
     //회원탈퇴 - 탈퇴
     @PostMapping("/{email}")
     public ResponseEntity<?> deactivateUser(@PathVariable String email) {
