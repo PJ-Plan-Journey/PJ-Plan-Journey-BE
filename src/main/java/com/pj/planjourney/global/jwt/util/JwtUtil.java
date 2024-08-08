@@ -1,6 +1,6 @@
 package com.pj.planjourney.global.jwt.util;
 
-import com.pj.planjourney.domain.refreshtoken.entity.Token;
+import com.pj.planjourney.domain.refreshtoken.Token;
 import com.pj.planjourney.domain.user.entity.User;
 import com.pj.planjourney.global.auth.repository.RefreshTokenRepository;
 import com.pj.planjourney.global.auth.service.UserDetailsImpl;

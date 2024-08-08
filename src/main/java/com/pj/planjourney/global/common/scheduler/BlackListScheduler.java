@@ -2,6 +2,7 @@ package com.pj.planjourney.global.common.scheduler;
 
 import com.pj.planjourney.domain.blacklist.entity.BlackList;
 import com.pj.planjourney.domain.blacklist.repository.BlackListRepository;
+import com.pj.planjourney.domain.blacklist.service.BlackListService;
 import com.pj.planjourney.domain.user.service.UserService;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
