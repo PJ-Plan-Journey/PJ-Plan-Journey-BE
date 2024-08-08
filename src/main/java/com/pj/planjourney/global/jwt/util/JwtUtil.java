@@ -26,7 +26,7 @@ public class JwtUtil {
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String AUTHORIZATION_KEY = "auth";
     public static final String BEARER_PREFIX = "Bearer ";
-    public static final long ACCESS_TOKEN_TIME = 60 * 60 * 1000L; // 60분
+    public static final long ACCESS_TOKEN_TIME = 5 * 60 * 1000L; // 테스트를 위해 5분 단위로 수정해둠
     public static final long REFRESH_TOKEN_TIME = 24 * 60 * 60 * 1000L; // 24시간
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
     private final RefreshTokenRepository refreshTokenRepository;

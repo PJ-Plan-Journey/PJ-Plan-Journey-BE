@@ -2,6 +2,7 @@ package com.pj.planjourney.domain.user.controller;
 
 import com.pj.planjourney.domain.refreshtoken.service.RefreshTokenService;
 import com.pj.planjourney.domain.user.dto.*;
+import com.pj.planjourney.domain.user.entity.User;
 import com.pj.planjourney.domain.user.service.UserService;
 import com.pj.planjourney.global.auth.service.UserDetailsImpl;
 import com.pj.planjourney.global.auth.service.UserDetailsServiceImpl;
@@ -72,6 +73,12 @@ public class UserController {
         return ResponseEntity.ok("삭제됨");
     }
 
+    @GetMapping("")
+    public  ResponseEntity<?> getUser(@RequestHeader("Authorization") String token){
+        String cleanToken = token.replace("Bearer ", "");  // "Bearer " 제거
+         userService.getUser(cleanToken);
+        return   ResponseEntity.ok("철회됨") ;
+    }
 
     //회원탈퇴 - 철회
     @PostMapping("/cancel-deactivation")
@@ -89,7 +96,7 @@ public class UserController {
         return ResponseEntity.ok(responseDto);
     }
 
-    //비밀번호 변경?해야겟죠
+    //비밀번호 변경
 
 
     //마이페이지

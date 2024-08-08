@@ -10,7 +10,6 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -71,29 +70,43 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
     private void handleLogout(HttpServletRequest request, HttpServletResponse response) {
         String accessToken = jwtUtil.getAccessTokenFromHeader(request);
         String refreshToken = jwtUtil.getRefreshTokenFromHeader(request);
-
-        if (accessToken != null) {
-            refreshTokenService.invalidateToken(accessToken);
+        try {
+            if (accessToken != null) {
+                refreshTokenService.invalidateToken(accessToken);
+            }
+            // 리프레시 토큰 무효화 및 삭제
+            if (refreshToken != null) {
+                refreshTokenService.invalidateToken(refreshToken);
+                Claims claims = jwtUtil.getUserInfoFromToken(refreshToken);
+                if (claims != null) {
+                    String userIdString = claims.getSubject();
+                    if (userIdString != null) {
+                        Long userId = Long.valueOf(userIdString);
+                        refreshTokenService.deleteRefreshToken(userId);
+                        log.info("Deleted refresh token for user ID: " + userId);
+                    }
+                }
+            }
+            response.setStatus(HttpServletResponse.SC_OK);
+        } catch (Exception e) {
+            log.error("Logout handling failed: " + e.getMessage(), e);
+            response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
         }
-        if (refreshToken != null) {
-            refreshTokenService.invalidateToken(refreshToken);
+    }
+
+        // 인증 처리
+        public void setAuthentication (String email){
+            SecurityContext context = SecurityContextHolder.createEmptyContext();
+            Authentication authentication = createAuthentication(email); //구현체 반환
+            context.setAuthentication(authentication); // 다시담기
+
+            SecurityContextHolder.setContext(context);
         }
-        response.setStatus(HttpServletResponse.SC_OK);
+
+        // 인증 객체 생성
+        private Authentication createAuthentication (String username){
+            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+        }
+
     }
-
-    // 인증 처리
-    public void setAuthentication(String email) {
-        SecurityContext context = SecurityContextHolder.createEmptyContext();
-        Authentication authentication = createAuthentication(email); //구현체 반환
-        context.setAuthentication(authentication); // 다시담기
-
-        SecurityContextHolder.setContext(context);
-    }
-
-    // 인증 객체 생성
-    private Authentication createAuthentication(String username) {
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-        return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
-    }
-
-}

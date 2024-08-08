@@ -48,4 +48,9 @@ public class RefreshTokenService {
         ValueOperations<String, String > valueOperations = redisTemplate.opsForValue();
         return valueOperations.get("blacklist:" + token) != null;
     }
+
+    public void deleteRefreshToken(Long userId) {
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        valueOperations.getOperations().delete("refreshToken:" + userId);
+    }
 }

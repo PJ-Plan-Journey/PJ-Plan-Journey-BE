@@ -43,7 +43,6 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
         log.info("로그인 시도");
         try {
             String body = StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
-//            System.out.println("Request body: " + body);
 
             if (body.isEmpty()) {
                 throw new RuntimeException("Request body is empty.");
@@ -81,10 +80,13 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         String accessToken = jwtUtil.createAccessToken(email, authorities);
         String refreshToken = jwtUtil.createRefreshToken(id);
-//        // Save refresh token
 
-        log.info(refreshToken);
-        log.info(id.toString());
+        // 기존 리프레시 토큰을 블랙리스트에 추가
+        String previousRefreshToken = refreshTokenService.getRefreshToken(id);
+        if (previousRefreshToken != null) {
+            refreshTokenService.invalidateToken(previousRefreshToken);
+        }
+
         refreshTokenService.saveRefreshToken(id, refreshToken);
         // Send tokens in response headers
         response.setHeader("Authorization", accessToken);

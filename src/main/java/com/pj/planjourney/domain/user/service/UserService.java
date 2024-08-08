@@ -3,11 +3,13 @@ package com.pj.planjourney.domain.user.service;
 import com.pj.planjourney.domain.blacklist.entity.BlackList;
 import com.pj.planjourney.domain.blacklist.repository.BlackListRepository;
 import com.pj.planjourney.domain.blacklist.service.BlackListService;
+import com.pj.planjourney.domain.refreshtoken.service.RefreshTokenService;
 import com.pj.planjourney.domain.user.dto.*;
 import com.pj.planjourney.domain.user.entity.Role;
 import com.pj.planjourney.domain.user.entity.User;
 import com.pj.planjourney.domain.user.repository.UserRepository;
 import com.pj.planjourney.global.auth.service.UserDetailsImpl;
+import com.pj.planjourney.global.jwt.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,6 +28,8 @@ public class UserService {
     private final UserRepository userRepository;
     private final BlackListRepository blackListRepository;
     private final BlackListService blackListService;
+    private final RefreshTokenService refreshTokenService;
+    private final JwtUtil jwtUtil;
 
     //회원가입
     public SignUpResponseDto signUp(SignUpRequestDto requestDto) {
@@ -101,6 +105,15 @@ public class UserService {
                 savedBlackList.getValidAt());
     }
 
+    //유저 값 받기
+    public User getUser(String token) {
+        String userEmail = jwtUtil.getUserInfoFromToken(token).getSubject(); // 토큰에서 사용자 ID 추출
+        User user = userRepository.findByEmail(userEmail).orElseThrow(() ->
+                new RuntimeException("User not found"));
+        log.info("Extracted email from token: {}", userEmail);
+        log.info("Found user: {}", user);
+        return user;
+    }
 
     // 회원 탈퇴 - 탈퇴
     public DeactivateUserResponseDto deactivateUser(String email) {
