@@ -2,46 +2,48 @@ package com.pj.planjourney.global.jwt.filter;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.pj.planjourney.domain.refreshtoken.service.RefreshTokenService;
 import com.pj.planjourney.domain.user.dto.LoginRequestDto;
 import com.pj.planjourney.global.auth.service.UserDetailsImpl;
 import com.pj.planjourney.global.jwt.util.JwtUtil;
 import jakarta.servlet.FilterChain;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.stereotype.Component;
 import org.springframework.util.StreamUtils;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 
+@Component
 @Slf4j(topic = "로그인 및 JWT 생성")
 public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private final ObjectMapper objectMapper;
     private final JwtUtil jwtUtil;
+    private RefreshTokenService refreshTokenService;
 
-    public JwtAuthenticationFilter(final AuthenticationManager authenticationManager, JwtUtil jwtUtil) {
+    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, JwtUtil jwtUtil, RefreshTokenService refreshTokenService) {
         super.setAuthenticationManager(authenticationManager);
-        objectMapper = new ObjectMapper()
-                .configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         this.jwtUtil = jwtUtil;
+        this.refreshTokenService = refreshTokenService;
+        this.objectMapper = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     }
+
 
     @Override
     public Authentication attemptAuthentication(HttpServletRequest request, HttpServletResponse response) throws AuthenticationException {
         log.info("로그인 시도");
         try {
             String body = StreamUtils.copyToString(request.getInputStream(), StandardCharsets.UTF_8);
-            System.out.println("Request body: " + body);
+//            System.out.println("Request body: " + body);
 
             if (body.isEmpty()) {
                 throw new RuntimeException("Request body is empty.");
@@ -79,6 +81,11 @@ public class JwtAuthenticationFilter extends UsernamePasswordAuthenticationFilte
 
         String accessToken = jwtUtil.createAccessToken(email, authorities);
         String refreshToken = jwtUtil.createRefreshToken(id);
+//        // Save refresh token
+
+        log.info(refreshToken);
+        log.info(id.toString());
+        refreshTokenService.saveRefreshToken(id, refreshToken);
         // Send tokens in response headers
         response.setHeader("Authorization", accessToken);
         response.setHeader("RefreshToken", refreshToken);

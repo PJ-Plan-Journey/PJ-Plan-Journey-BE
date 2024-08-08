@@ -1,5 +1,6 @@
 package com.pj.planjourney.global.config;
 
+import com.pj.planjourney.domain.refreshtoken.service.RefreshTokenService;
 import com.pj.planjourney.global.auth.service.UserDetailsServiceImpl;
 import com.pj.planjourney.global.jwt.JwtAuthenticationProvider;
 import com.pj.planjourney.global.jwt.filter.JwtAuthenticationFilter;
@@ -33,6 +34,7 @@ public class SecurityConfig {
     private final UserDetailsServiceImpl userDetailsService;
     private final AuthenticationConfiguration authenticationConfiguration;
     private final EntityManager entityManager;
+    private final RefreshTokenService refreshTokenService;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -41,12 +43,12 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthorizationFilter jwtAuthorizationFilter() {
-        return new JwtAuthorizationFilter(jwtUtil, userDetailsService);
+        return new JwtAuthorizationFilter(jwtUtil, userDetailsService, refreshTokenService);
     }
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(authenticationManager(), jwtUtil);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(authenticationManager(), jwtUtil,refreshTokenService);
         filter.setFilterProcessesUrl("/login");
         filter.setAuthenticationSuccessHandler(userAuthenticationSuccessHandler());
         filter.afterPropertiesSet();
@@ -84,12 +86,20 @@ public class SecurityConfig {
         http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class); // 수정
         http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class); // 수정
 
+        // 로그아웃 설정 추가
+        http.logout(logout -> logout
+                .logoutUrl("/logout") // 로그아웃 요청 URL
+                .logoutSuccessUrl("/login") // 로그아웃 후 리디렉션 URL
+                .invalidateHttpSession(true) // 세션 무효화
+                .deleteCookies("JSESSIONID") // 쿠키 삭제 (기본 세션 쿠키)
+        );
+
         return http.build();
     }
 
     @Bean
     public UserAuthenticationSuccessHandler userAuthenticationSuccessHandler() {
-        return new UserAuthenticationSuccessHandler();
+        return new UserAuthenticationSuccessHandler(refreshTokenService);
     }
 
     @Bean

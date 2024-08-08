@@ -2,7 +2,7 @@ package com.pj.planjourney.global.jwt.util;
 
 import com.pj.planjourney.domain.refreshtoken.Token;
 import com.pj.planjourney.domain.user.entity.User;
-import com.pj.planjourney.global.auth.repository.RefreshTokenRepository;
+import com.pj.planjourney.domain.refreshtoken.repository.RefreshTokenRepository;
 import com.pj.planjourney.global.auth.service.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -33,6 +33,7 @@ public class JwtUtil {
     @Value("${jwt.secret.key}")
     private String secretKey;
     private Key key;
+
 
     @PostConstruct
     public void init() {
@@ -74,6 +75,7 @@ public class JwtUtil {
                 .setExpiration(new Date(date.getTime() + REFRESH_TOKEN_TIME))
                 .signWith(key, signatureAlgorithm)
                 .compact();
+        //저장 부터 service단에서
         Token refreshToken = new Token(token, userId);
         refreshTokenRepository.save(refreshToken);
         return token;
@@ -126,4 +128,5 @@ public class JwtUtil {
     public Claims getUserInfoFromToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
+
 }

@@ -1,5 +1,6 @@
 package com.pj.planjourney.domain.user.controller;
 
+import com.pj.planjourney.domain.refreshtoken.service.RefreshTokenService;
 import com.pj.planjourney.domain.user.dto.*;
 import com.pj.planjourney.domain.user.service.UserService;
 import com.pj.planjourney.global.auth.service.UserDetailsImpl;
@@ -32,6 +33,7 @@ public class UserController {
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RefreshTokenService refreshTokenService;
 
 
     //회원가입
@@ -45,6 +47,15 @@ public class UserController {
 
 
     //로그아웃
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletRequest request) {
+        String refreshToken = jwtUtil.getRefreshTokenFromHeader(request);
+        if (refreshToken != null) {
+            refreshTokenService.invalidateToken(refreshToken);
+        }
+        return ResponseEntity.ok("Logged out successfully");
+    }
+
 
 
     //회원탈퇴

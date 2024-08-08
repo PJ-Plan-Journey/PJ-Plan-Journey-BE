@@ -1,5 +1,6 @@
 package com.pj.planjourney.global.jwt.filter;
 
+import com.pj.planjourney.domain.refreshtoken.service.RefreshTokenService;
 import com.pj.planjourney.global.auth.service.UserDetailsServiceImpl;
 import com.pj.planjourney.global.jwt.util.JwtUtil;
 import io.jsonwebtoken.Claims;
@@ -9,6 +10,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
@@ -25,11 +27,16 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
 
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
+    private final RefreshTokenService refreshTokenService;
 
     @Override
     protected void doFilterInternal(HttpServletRequest req, HttpServletResponse res, FilterChain filterChain) throws ServletException, IOException {
+        // 로그아웃 요청 처리
+        if (isLogoutRequest(req)) {
+            handleLogout(req, res);
+            return; // 로그아웃 처리 후 필터 체인의 나머지 부분을 실행하지 않도록 합니다.
+        }
 
-        //accesstoken / refreshtoken
         String accessToken = jwtUtil.getAccessTokenFromHeader(req);
         String refreshToken = jwtUtil.getRefreshTokenFromHeader(req);
 
@@ -57,6 +64,23 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         filterChain.doFilter(req, res);
     }
 
+    private boolean isLogoutRequest(HttpServletRequest request) {
+        return "POST".equalsIgnoreCase(request.getMethod()) && "/users/logout".equalsIgnoreCase(request.getRequestURI());
+    }
+
+    private void handleLogout(HttpServletRequest request, HttpServletResponse response) {
+        String accessToken = jwtUtil.getAccessTokenFromHeader(request);
+        String refreshToken = jwtUtil.getRefreshTokenFromHeader(request);
+
+        if (accessToken != null) {
+            refreshTokenService.invalidateToken(accessToken);
+        }
+        if (refreshToken != null) {
+            refreshTokenService.invalidateToken(refreshToken);
+        }
+        response.setStatus(HttpServletResponse.SC_OK);
+    }
+
     // 인증 처리
     public void setAuthentication(String email) {
         SecurityContext context = SecurityContextHolder.createEmptyContext();
@@ -72,5 +96,4 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter {
         return new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
     }
 
-    //에러에 대한 부분
 }
