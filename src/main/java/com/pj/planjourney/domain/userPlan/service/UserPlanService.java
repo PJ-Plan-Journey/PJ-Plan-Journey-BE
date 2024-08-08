@@ -78,6 +78,8 @@ public class UserPlanService {
     @Transactional
     public AcceptInvitePlanRequestDto acceptInvitePlan(Long userPlanId) {
         UserPlan userPlan = findUserPlanById(userPlanId);
+        isPending(userPlan);
+
         userPlan.toAccept();
         return new AcceptInvitePlanRequestDto(userPlan);
     }
@@ -90,6 +92,8 @@ public class UserPlanService {
     @Transactional
     public void rejectInvitePlan(Long userPlanId) {
         UserPlan userPlan = findUserPlanById(userPlanId);
+        isPending(userPlan);
+
         userPlan.toReject();
     }
 
@@ -106,6 +110,11 @@ public class UserPlanService {
     private UserPlan findUserPlanById(Long userPlanId) {
         return userPlanRepository.findById(userPlanId)
                 .orElseThrow(() -> new BusinessLogicException(REQUEST_NOT_FOUND));
+    }
+
+    private void isPending(UserPlan userPlan) {
+        if (userPlan.getInvitedStatus() != InvitedStatus.PENDING)
+            throw new BusinessLogicException(RESPONSE_ALREADY);
     }
 
 }
