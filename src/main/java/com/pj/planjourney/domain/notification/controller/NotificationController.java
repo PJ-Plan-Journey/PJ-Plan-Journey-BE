@@ -2,9 +2,11 @@ package com.pj.planjourney.domain.notification.controller;
 
 import com.pj.planjourney.domain.notification.dto.NotificationListsDto;
 import com.pj.planjourney.domain.notification.service.NotificationService;
+import com.pj.planjourney.global.auth.service.UserDetailsImpl;
 import com.pj.planjourney.global.common.response.ApiResponse;
 import com.pj.planjourney.global.common.response.ApiResponseMessage;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,14 +25,11 @@ public class NotificationController {
         notificationService.sendFriendInviteNotification(recipientId, senderId);
         return new ApiResponse<>(null, ApiResponseMessage.SUCCESS);
     }
-
-
-    // 여행 하루 전 리마인드 알림 생성
-    @PostMapping("/travel-reminder")
-    public ApiResponse<Void> sendTravelReminderNotification(@RequestParam Long userId,
-                                                            @RequestParam String message) {
-        notificationService.sendTravelReminderNotification(userId, message);
-        return new ApiResponse<>(null, ApiResponseMessage.SUCCESS);
+    // 모든 알림
+    @GetMapping
+    public ApiResponse<List<NotificationListsDto>> getAllNotifications(@AuthenticationPrincipal UserDetailsImpl userDetails) {
+        List<NotificationListsDto> notifications = notificationService.getAllNotifications(userDetails.getUser().getId());
+        return new ApiResponse<>(notifications, ApiResponseMessage.SUCCESS);
     }
 
     // 읽지 않은 알림 목록 조회

@@ -56,6 +56,14 @@ public class NotificationService {
         createNotification(message, "FRIEND_INVITE", recipientId);
     }
 
+    // 모든 알림 가져오기
+    public List<NotificationListsDto> getAllNotifications(Long userId) {
+        User user = findBySenderId(userId);
+        return notificationRepository.findByUser(user)
+                .stream()
+                .map(NotificationListsDto::new).toList();
+    }
+
     // 읽지 않은 알림 목록 가져오기
     public List<NotificationListsDto> getUnreadNotifications(Long userId) {
         User user = findBySenderId(userId);
@@ -80,8 +88,6 @@ public class NotificationService {
         Notification notification = new Notification(message, noticeType, user);
         notificationRepository.save(notification);
     }
-
-    // todo : 모든 알림 가져오기
 
     private User findBySenderId(Long senderId) {
         return userRepository.findById(senderId)
