@@ -15,13 +15,6 @@ import java.util.List;
 public class NotificationController {
     private final NotificationService notificationService;
 
-    // 친구 요청 알림 생성
-    @PostMapping("/friend-request")
-    public ApiResponse<Void> sendFriendRequestNotification(@RequestParam Long recipientId,
-                                                           @RequestParam Long senderId) {
-        notificationService.sendFriendRequestNotification(recipientId, senderId);
-        return new ApiResponse<>(null, ApiResponseMessage.SUCCESS);
-    }
 
     // 친구 초대 알림 생성
     @PostMapping("/friend-invite")
@@ -31,19 +24,6 @@ public class NotificationController {
         return new ApiResponse<>(null, ApiResponseMessage.SUCCESS);
     }
 
-    // 친구 요청 수락 알림 생성
-    @PostMapping("/friend-accepted")
-    public ApiResponse<Void> sendFriendAcceptedNotification(@RequestParam Long recipientId, @RequestParam Long senderId) {
-        notificationService.sendFriendAcceptedNotification(recipientId, senderId);
-        return new ApiResponse<>(null, ApiResponseMessage.SUCCESS);
-    }
-
-    // 친구 요청 거절 알림 생성
-    @PostMapping("/friend-rejected")
-    public ApiResponse<Void> sendFriendRejectedNotification(@RequestParam Long recipientId, @RequestParam Long senderId) {
-        notificationService.sendFriendRejectedNotification(recipientId, senderId);
-        return new ApiResponse<>(null, ApiResponseMessage.SUCCESS);
-    }
 
     // 여행 하루 전 리마인드 알림 생성
     @PostMapping("/travel-reminder")
