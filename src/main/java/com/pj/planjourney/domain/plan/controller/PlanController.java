@@ -29,8 +29,11 @@ public class PlanController {
     }
 
     @PatchMapping("/{planId}")
-    public ApiResponse<PlanUpdateTitleResponseDto> updatePlanTitle(@PathVariable Long planId, @RequestBody PlanUpdateTitleRequestDto requestDto) {
-        PlanUpdateTitleResponseDto responseDto = planService.updatePlanTitle(planId, requestDto);
+    public ApiResponse<PlanUpdateTitleResponseDto> updatePlanTitle(@PathVariable Long planId,
+                                                                   @RequestBody PlanUpdateTitleRequestDto requestDto,
+                                                                   @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Long userId = userDetails.getUser().getId();
+        PlanUpdateTitleResponseDto responseDto = planService.updatePlanTitle(planId, requestDto, userId);
         return new ApiResponse<>(responseDto, ApiResponseMessage.PLAN_UPDATE_TITLE);
     }
 
