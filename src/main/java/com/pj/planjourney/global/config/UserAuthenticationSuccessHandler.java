@@ -1,10 +1,12 @@
 package com.pj.planjourney.global.config;
 
+import com.pj.planjourney.domain.refreshtoken.service.RefreshTokenService;
 import com.pj.planjourney.domain.user.service.UserService;
 import com.pj.planjourney.global.auth.service.UserDetailsImpl;
 import com.pj.planjourney.global.jwt.util.JwtUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -14,11 +16,15 @@ import java.io.IOException;
 
 
 @Slf4j
+@RequiredArgsConstructor
 public class UserAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuccessHandler {
     @Autowired
     private JwtUtil jwtUtil;
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private final RefreshTokenService refreshTokenService;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response,
@@ -27,11 +33,15 @@ public class UserAuthenticationSuccessHandler extends SimpleUrlAuthenticationSuc
             UserDetailsImpl user = (UserDetailsImpl) authentication.getPrincipal();
             String accessToken = jwtUtil.createAccessToken(user.getUsername(), user.getAuthorities());
             String refreshToken = jwtUtil.createRefreshToken(user.getUser().getId());
+            Long userId = ((UserDetailsImpl) authentication.getPrincipal()).getUser().getId();
 
+            // Save refresh token
+            refreshTokenService.saveRefreshToken(userId, refreshToken);
+            log.info(refreshToken);
             response.setContentType("application/json");
             response.setHeader("Authorization", accessToken);
             response.setHeader("RefreshToken", refreshToken);
-            response.getWriter().write("{\"accessToken\":\"" + accessToken + "\", \"refreshToken\":\"" + refreshToken + "\"}");
+            //response.getWriter().write("{\"accessToken\":\"" + accessToken + "\", \"refreshToken\":\"" + refreshToken + "\"}");
 
             userService.cancelDeactivation(user.getUser().getId());
             log.info("로그인 성공 및 JWT 생성");

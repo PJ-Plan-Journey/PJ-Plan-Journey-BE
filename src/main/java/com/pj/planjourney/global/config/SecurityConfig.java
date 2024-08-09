@@ -1,5 +1,6 @@
 package com.pj.planjourney.global.config;
 
+import com.pj.planjourney.domain.refreshtoken.service.RefreshTokenService;
 import com.pj.planjourney.global.auth.service.UserDetailsServiceImpl;
 import com.pj.planjourney.global.jwt.JwtAuthenticationProvider;
 import com.pj.planjourney.global.jwt.filter.JwtAuthenticationFilter;
@@ -19,6 +20,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -32,7 +34,8 @@ public class SecurityConfig {
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
     private final AuthenticationConfiguration authenticationConfiguration;
-    private final EntityManager entityManager;
+    private final RefreshTokenService refreshTokenService;
+    private final UserAuthenticationFailureHandler userAuthenticationFailureHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -41,22 +44,17 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthorizationFilter jwtAuthorizationFilter() {
-        return new JwtAuthorizationFilter(jwtUtil, userDetailsService);
+        return new JwtAuthorizationFilter(jwtUtil, userDetailsService, refreshTokenService);
     }
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception {
-        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(authenticationManager(), jwtUtil);
+        JwtAuthenticationFilter filter = new JwtAuthenticationFilter(authenticationManager(), jwtUtil, refreshTokenService);
         filter.setFilterProcessesUrl("/login");
         filter.setAuthenticationSuccessHandler(userAuthenticationSuccessHandler());
+        filter.setAuthenticationFailureHandler(userAuthenticationFailureHandler); // 실패 핸들러 설정
         filter.afterPropertiesSet();
-        filter.setAuthenticationManager(authenticationManager());
         return filter;
-    }
-
-    @Bean
-    public EntityManager entityManager() {
-        return entityManager;
     }
 
     @Bean
@@ -81,15 +79,23 @@ public class SecurityConfig {
                         .anyRequest().authenticated() // 인증이 필요한 요청
         );
 
-        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class); // 수정
-        http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class); // 수정
+        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+        http.addFilterBefore(jwtAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
+
+        // 로그아웃 설정 추가
+        http.logout(logout -> logout
+                .logoutUrl("/logout") // 로그아웃 요청 URL
+                .logoutSuccessUrl("/login") // 로그아웃 후 리디렉션 URL
+                .invalidateHttpSession(true) // 세션 무효화
+                .deleteCookies("JSESSIONID") // 쿠키 삭제 (기본 세션 쿠키)
+        );
 
         return http.build();
     }
 
     @Bean
     public UserAuthenticationSuccessHandler userAuthenticationSuccessHandler() {
-        return new UserAuthenticationSuccessHandler();
+        return new UserAuthenticationSuccessHandler(refreshTokenService);
     }
 
     @Bean

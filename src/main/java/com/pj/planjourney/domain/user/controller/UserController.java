@@ -1,6 +1,8 @@
 package com.pj.planjourney.domain.user.controller;
 
+import com.pj.planjourney.domain.refreshtoken.service.RefreshTokenService;
 import com.pj.planjourney.domain.user.dto.*;
+import com.pj.planjourney.domain.user.entity.User;
 import com.pj.planjourney.domain.user.service.UserService;
 import com.pj.planjourney.global.auth.service.UserDetailsImpl;
 import com.pj.planjourney.global.auth.service.UserDetailsServiceImpl;
@@ -11,6 +13,7 @@ import com.pj.planjourney.global.jwt.util.JwtUtil;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -21,6 +24,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -32,28 +36,40 @@ public class UserController {
     private final JwtUtil jwtUtil;
     private final UserDetailsServiceImpl userDetailsService;
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final RefreshTokenService refreshTokenService;
 
 
     //회원가입
     @PostMapping("")
-    public ResponseEntity<?> signUp(@RequestBody SignUpRequestDto requestDto) {
+    public ResponseEntity<ApiResponse<SignUpResponseDto>> signUp(@RequestBody SignUpRequestDto requestDto) {
         SignUpResponseDto responseDto = userService.signUp(requestDto);
-        return ResponseEntity.ok(responseDto);
+        //ApiResponse<SignUpResponseDto> apiResponse = new ApiResponse<>(responseDto, ApiResponseMessage.USER_CREATED);
+        ApiResponse<SignUpResponseDto> apiResponse = new ApiResponse<>(null, ApiResponseMessage.USER_CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
     }
 
     //카카오 로그인
 
 
     //로그아웃
+    @PostMapping("/logout")
+    public ResponseEntity<ApiResponse<?>> logout(HttpServletRequest request) {
+        String refreshToken = jwtUtil.getRefreshTokenFromHeader(request);
+        if (refreshToken != null) {
+            refreshTokenService.invalidateToken(refreshToken);
+        }
+        return  ResponseEntity.ok(new ApiResponse<>(null, ApiResponseMessage.USER_LOGOUT));
+    }
 
 
-    //회원탈퇴
+    //회원탈퇴 - 요청
     @PostMapping("/signout")
     @PreAuthorize(("isAuthenticated()"))
     public ResponseEntity<?> signOut(@RequestBody SignOutRequestDto requestDto) {
         SignOutResponseDto responseDto = userService.signOut(requestDto);
-        return ResponseEntity.ok(responseDto);
+        return ResponseEntity.ok(new ApiResponse<>(null, ApiResponseMessage.USER_DELETED));
     }
+
     //회원탈퇴 - 탈퇴
     @PostMapping("/{email}")
     public ResponseEntity<?> deactivateUser(@PathVariable String email) {
@@ -73,16 +89,27 @@ public class UserController {
     //회원정보 수정
     @PatchMapping("")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<UpdateUserResponseDto> updateNickname(@RequestBody UpdateUserRequestDto requestDto) {
+    public  ResponseEntity<ApiResponse<UpdateUserResponseDto>>  updateNickname(@RequestBody UpdateUserRequestDto requestDto) {
         UpdateUserResponseDto responseDto = userService.updateNickname(requestDto);
-        return ResponseEntity.ok(responseDto);
+        return ResponseEntity.ok(new ApiResponse<>(responseDto, ApiResponseMessage.USER_CHANGED));
     }
 
-    //비밀번호 변경?해야겟죠
+    //비밀번호 변경
+    @PatchMapping("/password")
+    @PreAuthorize("isAuthenticated()")
+    public  ResponseEntity<ApiResponse<Void>>  updatePassword(@RequestBody UpdatePasswordRequestDto requestDto) {
+        userService.updatePassword(requestDto);
+        return ResponseEntity.ok(new ApiResponse<>(null, ApiResponseMessage.SUCCESS));
+    }
 
 
     //마이페이지
-
+    @GetMapping("/mypage")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<ApiResponse<List<MyUserPlanListResponseDto>>> mypagePlanList(@RequestParam(required = false) Long userId) {
+        List<MyUserPlanListResponseDto> responseDtoList = userService.mypagePlanList(userId);
+        return ResponseEntity.ok(new ApiResponse<>(responseDtoList, ApiResponseMessage.SUCCESS));
+    }
 
     @PostMapping("/login")
     public ResponseEntity<ApiResponse<UserResponseDto>> login(HttpServletRequest request, HttpServletResponse response) {
@@ -97,7 +124,6 @@ public class UserController {
                 jwtAuthenticationFilter.successfulAuthentication(request, response, null, authentication);
 
                 UserResponseDto userResponseDto = new UserResponseDto(
-                        userDetails.getUser().getId(),
                         userDetails.getUsername(),
                         userDetails.getUser().getNickname()
                 );

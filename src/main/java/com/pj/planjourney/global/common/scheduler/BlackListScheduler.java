@@ -27,7 +27,7 @@ public class BlackListScheduler {
         this.blackListService = blackListService;
     }
 
-    @Scheduled(fixedRate = 100000)
+    @Scheduled(fixedRate = 2000000)
     @Transactional
     public void processBlackistedUsers() {
         log.info("Scheduler executed");

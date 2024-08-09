@@ -3,11 +3,17 @@ package com.pj.planjourney.domain.user.service;
 import com.pj.planjourney.domain.blacklist.entity.BlackList;
 import com.pj.planjourney.domain.blacklist.repository.BlackListRepository;
 import com.pj.planjourney.domain.blacklist.service.BlackListService;
+import com.pj.planjourney.domain.plan.dto.PlanInfoRequestDto;
+import com.pj.planjourney.domain.plan.dto.PlanInfoResponseDto;
+import com.pj.planjourney.domain.refreshtoken.service.RefreshTokenService;
 import com.pj.planjourney.domain.user.dto.*;
 import com.pj.planjourney.domain.user.entity.Role;
 import com.pj.planjourney.domain.user.entity.User;
 import com.pj.planjourney.domain.user.repository.UserRepository;
+import com.pj.planjourney.domain.userPlan.entity.UserPlan;
+import com.pj.planjourney.domain.userPlan.repository.UserPlanRepository;
 import com.pj.planjourney.global.auth.service.UserDetailsImpl;
+import com.pj.planjourney.global.jwt.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -15,7 +21,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -26,6 +34,9 @@ public class UserService {
     private final UserRepository userRepository;
     private final BlackListRepository blackListRepository;
     private final BlackListService blackListService;
+    private final RefreshTokenService refreshTokenService;
+    private final JwtUtil jwtUtil;
+    private final UserPlanRepository userPlanRepository;
 
     //회원가입
     public SignUpResponseDto signUp(SignUpRequestDto requestDto) {
@@ -67,12 +78,16 @@ public class UserService {
         if(!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
             throw new RuntimeException("비번 틀림");
         }
+        if(requestDto.getNickname().equals(user.getNickname())){
+            throw new RuntimeException("닉네임을 바꿔주세요");
+        }
 
         user.updateNickname(requestDto.getNickname());
         userRepository.save(user);
 
         return new UpdateUserResponseDto(user.getNickname());
     }
+
 
     //회원 탈퇴 - 요청
     public SignOutResponseDto signOut(SignOutRequestDto requestDto){
@@ -102,6 +117,7 @@ public class UserService {
     }
 
 
+
     // 회원 탈퇴 - 탈퇴
     public DeactivateUserResponseDto deactivateUser(String email) {
         log.info("Deactivating user with email: {}", email);
@@ -128,7 +144,7 @@ public class UserService {
         Optional<BlackList> checkedBlackList = blackListRepository.findByUserId(userId);
         if(!checkedBlackList.isPresent()){
 //            throw new IllegalArgumentException("없음.");
-            return; // ??? 블랙리스트에 없으면 철회안해도되는건가요? 넹
+            return;
         }
         // 삭제 확인
         Optional<BlackList> deletedEntry = blackListRepository.findByUserId(userId);
@@ -141,7 +157,43 @@ public class UserService {
 
 
     //비밀번호 변경
+    public void updatePassword(UpdatePasswordRequestDto requestDto) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = userDetails.getUsername();
+        log.info(email);
 
-    //마이페이지 ?
+        User user = userRepository.findByEmail(email).orElseThrow(()->
+                new RuntimeException("user 없음"));
+
+        if(!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
+            throw new RuntimeException("비번 틀림");
+        }
+
+        user.updatePaswword(passwordEncoder.encode(requestDto.getNewPassword()));
+        userRepository.save(user);
+
+    }
+
+    //마이페이지
+    public List<MyUserPlanListResponseDto> mypagePlanList(Long userId) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        userId = userDetails.getUser().getId();
+
+        List<UserPlan> userPlans = userPlanRepository.getUserPlainsByUserId(userId);
+        List<MyUserPlanListResponseDto> responseDtoList = userPlans.stream()
+                .map(userPlan -> new MyUserPlanListResponseDto(
+                        userPlan.getId(),
+                        userPlan.getUser().getNickname(),
+                        userPlan.getPlan().getCity().getName(),
+                        userPlan.getPlan().getTitle(),
+                        userPlan.getPlan().getIsPublished(),
+                        userPlan.getPlan().getCreatedAt(),
+                        userPlan.getPlan().getPublishedAt(),
+                        userPlan.getPlan().getLikeCount(),
+                        userPlan.getPlan().getComments().size()
+                ))
+                .collect(Collectors.toList());
+        return responseDtoList;
+    }
 
 }

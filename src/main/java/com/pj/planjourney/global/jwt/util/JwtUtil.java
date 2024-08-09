@@ -2,7 +2,7 @@ package com.pj.planjourney.global.jwt.util;
 
 import com.pj.planjourney.domain.refreshtoken.Token;
 import com.pj.planjourney.domain.user.entity.User;
-import com.pj.planjourney.global.auth.repository.RefreshTokenRepository;
+import com.pj.planjourney.domain.refreshtoken.repository.RefreshTokenRepository;
 import com.pj.planjourney.global.auth.service.UserDetailsImpl;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -26,13 +26,14 @@ public class JwtUtil {
     public static final String AUTHORIZATION_HEADER = "Authorization";
     public static final String AUTHORIZATION_KEY = "auth";
     public static final String BEARER_PREFIX = "Bearer ";
-    public static final long ACCESS_TOKEN_TIME = 60 * 60 * 1000L; // 60분
+    public static final long ACCESS_TOKEN_TIME = 5 * 60 * 1000L; // 테스트를 위해 5분 단위로 수정해둠
     public static final long REFRESH_TOKEN_TIME = 24 * 60 * 60 * 1000L; // 24시간
     private final SignatureAlgorithm signatureAlgorithm = SignatureAlgorithm.HS256;
     private final RefreshTokenRepository refreshTokenRepository;
     @Value("${jwt.secret.key}")
     private String secretKey;
     private Key key;
+
 
     @PostConstruct
     public void init() {
@@ -74,6 +75,7 @@ public class JwtUtil {
                 .setExpiration(new Date(date.getTime() + REFRESH_TOKEN_TIME))
                 .signWith(key, signatureAlgorithm)
                 .compact();
+        //저장 부터 service단에서
         Token refreshToken = new Token(token, userId);
         refreshTokenRepository.save(refreshToken);
         return token;
@@ -126,4 +128,5 @@ public class JwtUtil {
     public Claims getUserInfoFromToken(String token) {
         return Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
     }
+
 }
