@@ -1,14 +1,11 @@
 package com.pj.planjourney.domain.notification.controller;
 
 import com.pj.planjourney.domain.notification.dto.NotificationListsDto;
-import com.pj.planjourney.domain.notification.dto.NotificationMessage;
 import com.pj.planjourney.domain.notification.service.NotificationService;
 import com.pj.planjourney.global.auth.service.UserDetailsImpl;
 import com.pj.planjourney.global.common.response.ApiResponse;
 import com.pj.planjourney.global.common.response.ApiResponseMessage;
 import lombok.RequiredArgsConstructor;
-import org.springframework.messaging.handler.annotation.MessageMapping;
-import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,12 +37,6 @@ public class NotificationController {
     public ApiResponse<Void> markNotificationAsRead(@AuthenticationPrincipal UserDetailsImpl userDetails) {
         notificationService.markAsRead(userDetails.getUser().getId());
         return new ApiResponse<>(null, ApiResponseMessage.SUCCESS);
-    }
-
-    @MessageMapping("/sendNotification")
-    @SendTo("/topic/notifications")
-    public NotificationMessage send(NotificationMessage message) {
-        return message;
     }
 
 
