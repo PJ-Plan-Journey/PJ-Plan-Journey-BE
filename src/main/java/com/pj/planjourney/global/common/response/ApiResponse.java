@@ -8,4 +8,5 @@ import lombok.Getter;
 public class ApiResponse<T> {
     private T data;
     private ApiResponseMessage message;
+
 }

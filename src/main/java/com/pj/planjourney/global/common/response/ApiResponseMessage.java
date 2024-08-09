@@ -7,6 +7,8 @@ import org.springframework.http.HttpStatus;
 public enum ApiResponseMessage {
     USER_CREATED(HttpStatus.CREATED, "회원가입에 성공했습니다."),
     USER_LOGIN(HttpStatus.OK,"로그인에 성공했습니다."),
+    USER_LOGOUT(HttpStatus.OK,"로그아웃에 성공하였습니다."),
+    USER_CHANGED(HttpStatus.OK,"회원 정보가 수정되었습니다."),
     USER_RETRIEVED(HttpStatus.OK, "유저 조회에 성공했습니다."),
     USERS_RETRIEVED(HttpStatus.OK, "유저 목록 조회에 성공했습니다."),
     USER_DELETED(HttpStatus.OK, "회원 삭제에 성공했습니다."),
