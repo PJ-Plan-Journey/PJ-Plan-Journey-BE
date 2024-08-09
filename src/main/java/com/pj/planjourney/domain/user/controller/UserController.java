@@ -106,8 +106,8 @@ public class UserController {
     //마이페이지
     @GetMapping("/mypage")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<ApiResponse<List<MyUserPlanListResponseDto>>> mypagePlanList(@RequestBody MyUserPlanListRequestDto requestDto) {
-        List<MyUserPlanListResponseDto> responseDtoList = userService.mypagePlanList(requestDto);
+    public ResponseEntity<ApiResponse<List<MyUserPlanListResponseDto>>> mypagePlanList(@RequestParam(required = false) Long userId) {
+        List<MyUserPlanListResponseDto> responseDtoList = userService.mypagePlanList(userId);
         return ResponseEntity.ok(new ApiResponse<>(responseDtoList, ApiResponseMessage.SUCCESS));
     }
 

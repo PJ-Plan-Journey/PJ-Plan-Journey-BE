@@ -175,9 +175,9 @@ public class UserService {
     }
 
     //마이페이지
-    public List<MyUserPlanListResponseDto> mypagePlanList(MyUserPlanListRequestDto requestDto) {
+    public List<MyUserPlanListResponseDto> mypagePlanList(Long userId) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        Long userId = userDetails.getUser().getId();
+        userId = userDetails.getUser().getId();
 
         List<UserPlan> userPlans = userPlanRepository.getUserPlainsByUserId(userId);
         List<MyUserPlanListResponseDto> responseDtoList = userPlans.stream()
@@ -190,7 +190,7 @@ public class UserService {
                         userPlan.getPlan().getCreatedAt(),
                         userPlan.getPlan().getPublishedAt(),
                         userPlan.getPlan().getLikeCount(),
-                        userPlan.getPlan().getComments().stream().count()
+                        userPlan.getPlan().getComments().size()
                 ))
                 .collect(Collectors.toList());
         return responseDtoList;

@@ -16,10 +16,10 @@ public class MyUserPlanListResponseDto {
     private LocalDateTime createAt;
     private LocalDateTime publishedAt;
     private Integer likeCount;
-    private Long commentCount;
+    private Integer commentCount;
 
 
-    public MyUserPlanListResponseDto(Long id, String nickname, String name, String title, Boolean isPublished, LocalDateTime createdAt, LocalDateTime publishedAt, Integer likeCount, long count) {
+    public MyUserPlanListResponseDto(Long id, String nickname, String name, String title, Boolean isPublished, LocalDateTime createdAt, LocalDateTime publishedAt, Integer likeCount, Integer count) {
         this.id = id;
         this.nickname = nickname;
         this.cityname = name;
