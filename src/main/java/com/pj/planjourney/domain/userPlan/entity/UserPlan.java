@@ -33,4 +33,9 @@ public class UserPlan {
         this.plan = plan;
         this.invitedStatus = invitedStatus;
     }
+
+    public UserPlan(User user, Plan plan) {
+        this.user = user;
+        this.plan = plan;
+    }
 }

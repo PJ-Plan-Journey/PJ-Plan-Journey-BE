@@ -26,13 +26,13 @@ public class PlanInfoResponseDto {
     private Integer likeCount;
 
 
-    public PlanInfoResponseDto(Plan plan, City city, List<PlanDetail> planDetails) {
+    public PlanInfoResponseDto(Plan plan, List<PlanDetail> planDetails) {
         this.id = plan.getId();
         this.title = plan.getTitle();
         this.isPublished = plan.getIsPublished();
         this.publishedAt = plan.getPublishedAt();
-       // this.nickName = plan.getUser().getNickname();
-       // this.cityName = city.getName();
+//        this.nickName =
+        this.cityName = plan.getCity().getName();
         this.planDetails = planDetails;
         this.createAt = LocalDateTime.now();
         this.likeCount = plan.getLikeCount();
