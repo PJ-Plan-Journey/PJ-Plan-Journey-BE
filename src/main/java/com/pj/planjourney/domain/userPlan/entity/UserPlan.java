@@ -33,4 +33,12 @@ public class UserPlan {
         this.plan = plan;
         this.invitedStatus = invitedStatus;
     }
+
+    public void toAccept() {
+        this.invitedStatus = InvitedStatus.ACCEPTED;
+    }
+
+    public void toReject() {
+        this.invitedStatus = InvitedStatus.REJECTED;
+    }
 }

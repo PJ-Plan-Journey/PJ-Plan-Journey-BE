@@ -44,7 +44,7 @@ public class PlanService {
             plan.addPlanDetail(planDetail);
             planDetailRepository.save(planDetail);
         }
-        userPlanRepository.save(new UserPlan(user, plan, InvitedStatus.ACCEPT));
+        userPlanRepository.save(new UserPlan(user, plan, InvitedStatus.ACCEPTED));
         return new CreatePlanResponseDto(plan);
     }
 
