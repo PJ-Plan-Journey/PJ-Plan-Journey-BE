@@ -10,6 +10,8 @@ import com.pj.planjourney.domain.user.dto.*;
 import com.pj.planjourney.domain.user.entity.Role;
 import com.pj.planjourney.domain.user.entity.User;
 import com.pj.planjourney.domain.user.repository.UserRepository;
+import com.pj.planjourney.domain.userPlan.entity.UserPlan;
+import com.pj.planjourney.domain.userPlan.repository.UserPlanRepository;
 import com.pj.planjourney.global.auth.service.UserDetailsImpl;
 import com.pj.planjourney.global.jwt.util.JwtUtil;
 import lombok.RequiredArgsConstructor;
@@ -19,7 +21,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -32,6 +36,7 @@ public class UserService {
     private final BlackListService blackListService;
     private final RefreshTokenService refreshTokenService;
     private final JwtUtil jwtUtil;
+    private final UserPlanRepository userPlanRepository;
 
     //회원가입
     public SignUpResponseDto signUp(SignUpRequestDto requestDto) {
@@ -170,10 +175,25 @@ public class UserService {
     }
 
     //마이페이지
-    public PlanInfoResponseDto mypagePlanList(PlanInfoRequestDto requestDto) {
+    public List<MyUserPlanListResponseDto> mypagePlanList(MyUserPlanListRequestDto requestDto) {
         UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        String email = userDetails.getUsername();
-        return new PlanInfoResponseDto();
+        Long userId = userDetails.getUser().getId();
+
+        List<UserPlan> userPlans = userPlanRepository.getUserPlainsByUserId(userId);
+        List<MyUserPlanListResponseDto> responseDtoList = userPlans.stream()
+                .map(userPlan -> new MyUserPlanListResponseDto(
+                        userPlan.getId(),
+                        userPlan.getUser().getNickname(),
+                        userPlan.getPlan().getCity().getName(),
+                        userPlan.getPlan().getTitle(),
+                        userPlan.getPlan().getIsPublished(),
+                        userPlan.getPlan().getCreatedAt(),
+                        userPlan.getPlan().getPublishedAt(),
+                        userPlan.getPlan().getLikeCount(),
+                        userPlan.getPlan().getComments().stream().count()
+                ))
+                .collect(Collectors.toList());
+        return responseDtoList;
     }
 
 }
