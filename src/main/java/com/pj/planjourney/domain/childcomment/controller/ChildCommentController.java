@@ -2,9 +2,13 @@ package com.pj.planjourney.domain.childcomment.controller;
 
 import com.pj.planjourney.domain.childcomment.dto.*;
 import com.pj.planjourney.domain.childcomment.service.ChildCommentService;
+import com.pj.planjourney.global.auth.service.UserDetailsImpl;
+import com.pj.planjourney.global.common.response.ApiResponse;
+import com.pj.planjourney.global.common.response.ApiResponseMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -16,25 +20,33 @@ public class ChildCommentController {
     private final ChildCommentService childCommentService;
 
     @PostMapping("/{commentId}/child-comments")
-    public ResponseEntity<ChildCommentCreateResponseDto> createChildComment(@PathVariable Long commentId, @RequestHeader Long userId, @RequestBody ChildCommentCreateRequestDto requestDto) {
+    public ApiResponse<ChildCommentCreateResponseDto> createChildComment(@PathVariable Long commentId,
+                                                                         @AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                         @RequestBody ChildCommentCreateRequestDto requestDto) {
+        Long userId = userDetails.getUser().getId();
         ChildCommentCreateResponseDto responseDto = childCommentService.createChildComment(requestDto, commentId, userId);
-        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+        return new ApiResponse<>(responseDto, ApiResponseMessage.CHILD_COMMENT_CREATE);
     }
 
     @GetMapping("/child-comments/{childCommentId}")
-    public ResponseEntity<List<ChildCommentListResponseDto>> getAllChildComment(@PathVariable Long childCommentId) {
+    public ApiResponse<List<ChildCommentListResponseDto>> getAllChildComment(@PathVariable Long childCommentId) {
         List<ChildCommentListResponseDto> responseDto = childCommentService.getAllChildComment(childCommentId);
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        return new ApiResponse<>(responseDto, ApiResponseMessage.SUCCESS);
     }
 
     @PatchMapping("/child-comments/{childCommentId}")
-    public ResponseEntity<ChildCommentUpdateResponseDto> updateChildComment(@PathVariable Long childCommentId, @RequestHeader Long userId, @RequestBody ChildCommentUpdateRequestDto requestDto) {
+    public ApiResponse<ChildCommentUpdateResponseDto> updateChildComment(@PathVariable Long childCommentId,
+                                                                         @AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                                         @RequestBody ChildCommentUpdateRequestDto requestDto) {
+        Long userId = userDetails.getUser().getId();
         ChildCommentUpdateResponseDto responseDto = childCommentService.updateChildComment(childCommentId, userId, requestDto);
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        return new ApiResponse<>(responseDto, ApiResponseMessage.CHILD_COMMENT_UPDATE);
     }
     @DeleteMapping("/child-comments/{childCommentId}")
-    public ResponseEntity<Void> deleteChildComment(@PathVariable Long childCommentId, @RequestHeader Long userId) {
+    public ApiResponse<Void> deleteChildComment(@PathVariable Long childCommentId,
+                                                @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Long userId = userDetails.getUser().getId();
         childCommentService.deleteChildComment(childCommentId, userId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ApiResponse<>(null, ApiResponseMessage.CHILD_COMMENT_DELETE);
     }
 }

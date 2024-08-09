@@ -1,6 +1,7 @@
 package com.pj.planjourney.domain.plan.dto;
 
 import com.pj.planjourney.domain.plan.entity.Plan;
+import com.pj.planjourney.domain.userPlan.entity.UserPlan;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -11,16 +12,16 @@ public class PlanUpdateTitleResponseDto {
     private String title;
     private Boolean isPublished;
     private LocalDateTime publishedAt;
-    private Long userId;
-    private Long cityId;
+    private String userNickName;
+    private String cityName;
 
-    public PlanUpdateTitleResponseDto(Plan plan) {
+    public PlanUpdateTitleResponseDto(Plan plan, UserPlan userPlan) {
         this.id = plan.getId();
         this.title = plan.getTitle();
         this.isPublished = plan.getIsPublished();
         this.publishedAt = plan.getPublishedAt();
-        //this.userId = plan.getUser().getId();
-        //this.cityId = plan.getCity().getId();
+        this.userNickName = userPlan.getUser().getNickname();
+        this.cityName = plan.getCity().getName();
 
     }
 

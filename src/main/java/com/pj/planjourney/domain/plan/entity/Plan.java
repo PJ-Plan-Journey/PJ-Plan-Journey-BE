@@ -49,12 +49,6 @@ public class Plan extends Timestamped {
     @OneToMany(mappedBy = "plan", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Like> likes = new ArrayList<>();
 
-    public Plan(String title, UserPlan userPlan) {
-        this.title = title;
-        this.isPublished = false;
-        this.userPlans = getUserPlans();
-    }
-
     public void updatePlan(PlanUpdateTitleRequestDto requestDto) {
         if (requestDto.getTitle() != null) {
             this.title = requestDto.getTitle();
@@ -64,17 +58,20 @@ public class Plan extends Timestamped {
         return likes.size();
     }
     public void publish(Boolean isPublished){
-        this.isPublished = true;
+        this.isPublished = isPublished;
     }
 
-    public Plan(Plan originalPlan, User user) {
+    public Plan(Plan originalPlan, User newUser) {
         this.title = originalPlan.getTitle();
         this.isPublished = false;
-        //  this.city = originalPlan.getCity();
+        this.city = originalPlan.getCity();
         this.publishedAt = null;
         for (PlanDetail planDetail : originalPlan.getPlanDetails()) {
             this.planDetails.add(new PlanDetail(planDetail, this));
         }
+
+        UserPlan userPlan = new UserPlan(newUser, this);
+        this.userPlans.add(userPlan);
     }
 
     public Plan(CreatePlanRequestDto request, City city) {

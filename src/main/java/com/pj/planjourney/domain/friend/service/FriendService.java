@@ -8,6 +8,7 @@ import com.pj.planjourney.domain.friend.entity.Friend;
 import com.pj.planjourney.domain.friend.repository.FriendRepository;
 import com.pj.planjourney.domain.friendrequest.entity.FriendRequest;
 import com.pj.planjourney.domain.friendrequest.repository.FriendRequestRepository;
+import com.pj.planjourney.domain.notification.service.NotificationService;
 import com.pj.planjourney.domain.user.entity.User;
 import com.pj.planjourney.domain.user.repository.UserRepository;
 import com.pj.planjourney.global.common.exception.BusinessLogicException;
@@ -24,18 +25,21 @@ public class FriendService {
     private final UserRepository userRepository;
     private final FriendRequestRepository friendRequestRepository;
     private final FriendRepository friendRepository;
+    private final NotificationService notificationService;
 
+    @Transactional
     public void sendFriendRequest(FriendRequestSendDto requestCreateDto, Long userId) {
-        User requester = getUserById(userId);
+        User sender = getUserById(userId);
         User receiver = userRepository.findByEmail(requestCreateDto.getReceiverEmail())
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.USER_NOT_FOUND));
 
-        if (friendRequestRepository.findBySenderAndReceiver(requester, receiver) != null) {
+        if (friendRequestRepository.findBySenderAndReceiver(sender, receiver) != null) {
             throw new BusinessLogicException(ExceptionCode.REQUEST_ALREADY_SENT);
         }
 
-        FriendRequest friendRequest = new FriendRequest(requester, receiver);
+        FriendRequest friendRequest = new FriendRequest(sender, receiver);
         friendRequestRepository.save(friendRequest);
+        notificationService.sendFriendRequestNotification(receiver.getId(), sender.getId());
     }
 
 
@@ -52,19 +56,20 @@ public class FriendService {
 
         friendRequest.accept();
 
-        User requester = friendRequest.getSender();
+        User sender = friendRequest.getSender();
         User receiver = friendRequest.getReceiver();
 
-        Friend friend1 = new Friend(requester, receiver);
-        Friend friend2 = new Friend(receiver, requester);
+        Friend friend1 = new Friend(sender, receiver);
+        Friend friend2 = new Friend(receiver, sender);
 
         friendRepository.save(friend1);
         friendRepository.save(friend2);
+        notificationService.sendFriendAcceptedNotification(receiver.getId(),sender.getId());
     }
 
     @Transactional
-    public void rejectFriendRequest(Long requestId) {
-        FriendRequest friendRequest = friendRequestRepository.findById(requestId)
+    public void rejectFriendRequest(Long senderId) {
+        FriendRequest friendRequest = friendRequestRepository.findById(senderId)
                 .orElseThrow(() -> new BusinessLogicException(ExceptionCode.REQUEST_NOT_FOUND));
 
         friendRequest.reject();
@@ -75,7 +80,6 @@ public class FriendService {
         return friendRepository.findByUser(user).stream()
                 .map(FriendResponseDto::new).toList();
     }
-
     @Transactional
     public void deleteFriend(Long userId, FriendDeleteDto friendDeleteDto) {
         User user = getUserById(userId);
