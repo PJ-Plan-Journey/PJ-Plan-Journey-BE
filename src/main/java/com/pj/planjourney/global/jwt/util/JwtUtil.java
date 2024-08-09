@@ -50,13 +50,14 @@ public class JwtUtil {
     // 토큰 생성
     public String createAccessToken(String email, Collection<? extends GrantedAuthority> authorities) {
         Date date = new Date();
+        String roles = authorities.stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.joining(","));
 
         return BEARER_PREFIX +
                 Jwts.builder()
                         .setSubject(email)
-                        .claim(AUTHORIZATION_KEY, authorities.stream()
-                                .map(GrantedAuthority::getAuthority)
-                                .collect(Collectors.joining(",")))
+                        .claim(AUTHORIZATION_KEY, roles)
                         .setExpiration(new Date(date.getTime() + ACCESS_TOKEN_TIME))
                         .setIssuedAt(date)
                         .signWith(key, signatureAlgorithm)
@@ -111,6 +112,7 @@ public class JwtUtil {
             return "JWT claims is empty, 잘못된 JWT 토큰 입니다.";
         }
     }
+
 
     // 토큰에서 사용자 정보 및 권한 정보를 가져오기
     public UserDetailsImpl getUserDetailsFromToken(String token, User user) {

@@ -12,7 +12,7 @@ import com.pj.planjourney.global.common.Timestamped;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import org.springframework.data.redis.core.RedisHash;
+import lombok.Setter;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -22,6 +22,7 @@ import java.util.Set;
 @Entity
 @Getter
 @NoArgsConstructor
+@Setter
 @Table(name = "users")
 public class User extends Timestamped {
     @Id
@@ -34,6 +35,9 @@ public class User extends Timestamped {
     private String password;
 
     private String nickname;
+
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = false, fetch = FetchType.LAZY)
     private List<UserPlan> userPlans = new ArrayList<>();  // 유저가 삭제되어도 게시글은 남아있다. 이 분분 유저 정보가 없는데 어떻게 처리할지
@@ -56,15 +60,25 @@ public class User extends Timestamped {
     @OneToMany(mappedBy = "user")
     private List<Notification> notifications = new ArrayList<>();
 
-    @OneToOne(mappedBy = "userId", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
     private BlackList blackLists;
 
-    public User(String email, String encode, String nickname) {
-        super();
+    public User(String email, String encode, String nickname, Role role) {
+       this.email = email;
+       this.nickname = nickname;
+       this.password = encode;
+       this.role = role;
     }
 
 
     public void updateNickname(String nickname) {
         this.nickname = nickname;
+    }
+
+    public void deactivateUser(String annoymousEmail, String annoymousNickname, String annoymousPassword) {
+        this.email = annoymousEmail;
+        this.password = annoymousPassword;
+        this.nickname = annoymousNickname;
+
     }
 }
