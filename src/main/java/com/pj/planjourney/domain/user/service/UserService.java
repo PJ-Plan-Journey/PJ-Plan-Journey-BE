@@ -3,6 +3,8 @@ package com.pj.planjourney.domain.user.service;
 import com.pj.planjourney.domain.blacklist.entity.BlackList;
 import com.pj.planjourney.domain.blacklist.repository.BlackListRepository;
 import com.pj.planjourney.domain.blacklist.service.BlackListService;
+import com.pj.planjourney.domain.plan.dto.PlanInfoRequestDto;
+import com.pj.planjourney.domain.plan.dto.PlanInfoResponseDto;
 import com.pj.planjourney.domain.refreshtoken.service.RefreshTokenService;
 import com.pj.planjourney.domain.user.dto.*;
 import com.pj.planjourney.domain.user.entity.Role;
@@ -71,12 +73,16 @@ public class UserService {
         if(!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
             throw new RuntimeException("비번 틀림");
         }
+        if(requestDto.getNickname().equals(user.getNickname())){
+            throw new RuntimeException("닉네임을 바꿔주세요");
+        }
 
         user.updateNickname(requestDto.getNickname());
         userRepository.save(user);
 
         return new UpdateUserResponseDto(user.getNickname());
     }
+
 
     //회원 탈퇴 - 요청
     public SignOutResponseDto signOut(SignOutRequestDto requestDto){
@@ -105,15 +111,7 @@ public class UserService {
                 savedBlackList.getValidAt());
     }
 
-    //유저 값 받기
-    public User getUser(String token) {
-        String userEmail = jwtUtil.getUserInfoFromToken(token).getSubject(); // 토큰에서 사용자 ID 추출
-        User user = userRepository.findByEmail(userEmail).orElseThrow(() ->
-                new RuntimeException("User not found"));
-        log.info("Extracted email from token: {}", userEmail);
-        log.info("Found user: {}", user);
-        return user;
-    }
+
 
     // 회원 탈퇴 - 탈퇴
     public DeactivateUserResponseDto deactivateUser(String email) {
@@ -141,7 +139,7 @@ public class UserService {
         Optional<BlackList> checkedBlackList = blackListRepository.findByUserId(userId);
         if(!checkedBlackList.isPresent()){
 //            throw new IllegalArgumentException("없음.");
-            return; // ??? 블랙리스트에 없으면 철회안해도되는건가요? 넹
+            return;
         }
         // 삭제 확인
         Optional<BlackList> deletedEntry = blackListRepository.findByUserId(userId);
@@ -154,7 +152,28 @@ public class UserService {
 
 
     //비밀번호 변경
+    public void updatePassword(UpdatePasswordRequestDto requestDto) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = userDetails.getUsername();
+        log.info(email);
 
-    //마이페이지 ?
+        User user = userRepository.findByEmail(email).orElseThrow(()->
+                new RuntimeException("user 없음"));
+
+        if(!passwordEncoder.matches(requestDto.getPassword(), user.getPassword())) {
+            throw new RuntimeException("비번 틀림");
+        }
+
+        user.updatePaswword(passwordEncoder.encode(requestDto.getNewPassword()));
+        userRepository.save(user);
+
+    }
+
+    //마이페이지
+    public PlanInfoResponseDto mypagePlanList(PlanInfoRequestDto requestDto) {
+        UserDetailsImpl userDetails = (UserDetailsImpl) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        String email = userDetails.getUsername();
+        return new PlanInfoResponseDto();
+    }
 
 }

@@ -81,4 +81,8 @@ public class User extends Timestamped {
         this.nickname = annoymousNickname;
 
     }
+
+    public void updatePaswword(String password) {
+        this.password = password;
+    }
 }

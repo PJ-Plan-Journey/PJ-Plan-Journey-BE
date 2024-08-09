@@ -8,12 +8,10 @@ import lombok.Setter;
 @Setter
 @NoArgsConstructor
 public class UserResponseDto {
-    private Long id;
     private String email;
     private String nickname;
 
-    public UserResponseDto(Long id, String username, String nickname) {
-        this.id = id;
+    public UserResponseDto(String username, String nickname) {
         this.email = username;
         this.nickname = nickname;
     }

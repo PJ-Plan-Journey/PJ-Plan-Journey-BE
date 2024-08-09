@@ -41,7 +41,9 @@ public class UserController {
     @PostMapping("")
     public ResponseEntity<ApiResponse<SignUpResponseDto>> signUp(@RequestBody SignUpRequestDto requestDto) {
         SignUpResponseDto responseDto = userService.signUp(requestDto);
-        return ResponseEntity.ok(new ApiResponse<>(responseDto, ApiResponseMessage.USER_CREATED));
+        //ApiResponse<SignUpResponseDto> apiResponse = new ApiResponse<>(responseDto, ApiResponseMessage.USER_CREATED);
+        ApiResponse<SignUpResponseDto> apiResponse = new ApiResponse<>(null, ApiResponseMessage.USER_CREATED);
+        return ResponseEntity.status(HttpStatus.CREATED).body(apiResponse);
     }
 
     //카카오 로그인
@@ -49,22 +51,21 @@ public class UserController {
 
     //로그아웃
     @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletRequest request) {
+    public ResponseEntity<ApiResponse<?>> logout(HttpServletRequest request) {
         String refreshToken = jwtUtil.getRefreshTokenFromHeader(request);
         if (refreshToken != null) {
             refreshTokenService.invalidateToken(refreshToken);
         }
-        return ResponseEntity.ok("Logged out successfully");
+        return  ResponseEntity.ok(new ApiResponse<>(null, ApiResponseMessage.USER_LOGOUT));
     }
 
 
-
-    //회원탈퇴
+    //회원탈퇴 - 요청
     @PostMapping("/signout")
     @PreAuthorize(("isAuthenticated()"))
     public ResponseEntity<?> signOut(@RequestBody SignOutRequestDto requestDto) {
         SignOutResponseDto responseDto = userService.signOut(requestDto);
-        return ResponseEntity.ok(responseDto);
+        return ResponseEntity.ok(new ApiResponse<>(null, ApiResponseMessage.USER_DELETED));
     }
 
     //회원탈퇴 - 탈퇴
@@ -74,12 +75,6 @@ public class UserController {
         return ResponseEntity.ok("삭제됨");
     }
 
-    @GetMapping("")
-    public  ResponseEntity<?> getUser(@RequestHeader("Authorization") String token){
-        String cleanToken = token.replace("Bearer ", "");  // "Bearer " 제거
-         userService.getUser(cleanToken);
-        return   ResponseEntity.ok("철회됨") ;
-    }
 
     //회원탈퇴 - 철회
     @PostMapping("/cancel-deactivation")
@@ -92,15 +87,22 @@ public class UserController {
     //회원정보 수정
     @PatchMapping("")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<UpdateUserResponseDto> updateNickname(@RequestBody UpdateUserRequestDto requestDto) {
+    public  ResponseEntity<ApiResponse<UpdateUserResponseDto>>  updateNickname(@RequestBody UpdateUserRequestDto requestDto) {
         UpdateUserResponseDto responseDto = userService.updateNickname(requestDto);
-        return ResponseEntity.ok(responseDto);
+        return ResponseEntity.ok(new ApiResponse<>(responseDto, ApiResponseMessage.USER_CHANGED));
     }
 
     //비밀번호 변경
+    @PatchMapping("/password")
+    @PreAuthorize("isAuthenticated()")
+    public  ResponseEntity<ApiResponse<Void>>  updatePassword(@RequestBody UpdatePasswordRequestDto requestDto) {
+        userService.updatePassword(requestDto);
+        return ResponseEntity.ok(new ApiResponse<>(null, ApiResponseMessage.SUCCESS));
+    }
 
 
     //마이페이지
+
 
 
     @PostMapping("/login")
@@ -116,7 +118,6 @@ public class UserController {
                 jwtAuthenticationFilter.successfulAuthentication(request, response, null, authentication);
 
                 UserResponseDto userResponseDto = new UserResponseDto(
-                        userDetails.getUser().getId(),
                         userDetails.getUsername(),
                         userDetails.getUser().getNickname()
                 );
