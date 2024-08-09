@@ -37,7 +37,7 @@ public class UserPlan {
     public UserPlan(User user, Plan plan) {
         this.user = user;
         this.plan = plan;
-
+    }
     public void toAccept() {
         this.invitedStatus = InvitedStatus.ACCEPTED;
     }
