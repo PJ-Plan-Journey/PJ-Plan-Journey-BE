@@ -2,9 +2,13 @@ package com.pj.planjourney.domain.comment.controller;
 
 import com.pj.planjourney.domain.comment.dto.*;
 import com.pj.planjourney.domain.comment.service.CommentService;
+import com.pj.planjourney.global.auth.service.UserDetailsImpl;
+import com.pj.planjourney.global.common.response.ApiResponse;
+import com.pj.planjourney.global.common.response.ApiResponseMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,27 +21,37 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("/comments")
-    public ResponseEntity<CommentCreateResponseDto> createComment(@PathVariable Long planId, @RequestHeader Long userId, @RequestBody CommentCreateRequestDto requestDto) {
+    public ApiResponse<CommentCreateResponseDto> createComment(@PathVariable Long planId,
+                                                               @AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                               @RequestBody CommentCreateRequestDto requestDto) {
+        Long userId = userDetails.getUser().getId();
         CommentCreateResponseDto responseDto = commentService.createComment(requestDto, userId, planId);
-        return new ResponseEntity<>(responseDto, HttpStatus.CREATED);
+        return new ApiResponse<>(responseDto, ApiResponseMessage.COMMENT_CREATE);
     }
 
     @GetMapping("/comments")
-    public ResponseEntity<List<CommentListResponseDto>> getAllComment(@PathVariable Long planId) {
+    public ApiResponse<List<CommentListResponseDto>> getAllComment(@PathVariable Long planId) {
         List<CommentListResponseDto> responseDto = commentService.getAllComment(planId);
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        return new ApiResponse<>(responseDto, ApiResponseMessage.SUCCESS);
     }
 
     @PatchMapping("/comments/{commentId}")
-    public ResponseEntity<CommentUpdateResponseDto> updateComment(@PathVariable Long planId, @PathVariable Long commentId, @RequestHeader Long userId, @RequestBody CommentUpdateRequestDto requestDto) {
+    public ApiResponse<CommentUpdateResponseDto> updateComment(@PathVariable Long planId,
+                                                               @PathVariable Long commentId,
+                                                               @AuthenticationPrincipal UserDetailsImpl userDetails,
+                                                               @RequestBody CommentUpdateRequestDto requestDto) {
+        Long userId = userDetails.getUser().getId();
         CommentUpdateResponseDto responseDto = commentService.updateComment(planId, commentId, userId, requestDto);
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        return new ApiResponse<>(responseDto, ApiResponseMessage.COMMENT_UPDATE);
     }
 
     @DeleteMapping("/comments/{commentId}")
-    public ResponseEntity<Void> deleteComment(@PathVariable Long planId, @PathVariable Long commentId, @RequestHeader Long userId) {
+    public ApiResponse<Void> deleteComment(@PathVariable Long planId,
+                                           @PathVariable Long commentId,
+                                           @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Long userId = userDetails.getUser().getId();
         commentService.deleteComment(planId, commentId, userId);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        return new ApiResponse<>(null, ApiResponseMessage.COMMENT_DELETE);
     }
 
 }

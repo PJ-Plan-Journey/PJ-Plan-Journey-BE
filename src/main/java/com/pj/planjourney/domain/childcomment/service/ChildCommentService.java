@@ -7,6 +7,8 @@ import com.pj.planjourney.domain.comment.entity.Comment;
 import com.pj.planjourney.domain.comment.repository.CommentRepository;
 import com.pj.planjourney.domain.user.entity.User;
 import com.pj.planjourney.domain.user.repository.UserRepository;
+import com.pj.planjourney.global.common.exception.BusinessLogicException;
+import com.pj.planjourney.global.common.exception.ExceptionCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -21,9 +23,9 @@ public class ChildCommentService {
 
     public ChildCommentCreateResponseDto createChildComment(ChildCommentCreateRequestDto requestDto,Long commentId, Long userId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
+                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.COMMENT_NOT_FOUND);
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.USER_NOT_FOUND));
 
         ChildComment childComment = new ChildComment(requestDto, comment, user);
 
@@ -43,7 +45,7 @@ public class ChildCommentService {
         ChildComment childComment = getChildCommentById(childCommentId);
 
         if(!childComment.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("User ID mismatch");
+            throw new BusinessLogicException(ExceptionCode.USER_ID_MISMATCH);
         }
         childComment.updateChildComment(requestDto);
         ChildComment updatedChildComment = childCommentRepository.save(childComment);
@@ -52,14 +54,14 @@ public class ChildCommentService {
 
     private ChildComment getChildCommentById(Long childCommentId) {
         return childCommentRepository.findById(childCommentId)
-                .orElseThrow(() -> new IllegalArgumentException("ChildComment not found"));
+                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.CHILD_COMMENT_NOT_FOUND));
     }
 
     public void deleteChildComment(Long childCommentId, Long userId) {
         ChildComment childComment = getChildCommentById(childCommentId);
 
         if(!childComment.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("User ID mismatch");
+            throw new BusinessLogicException(ExceptionCode.USER_ID_MISMATCH);
         }
         childCommentRepository.delete(childComment);
     }

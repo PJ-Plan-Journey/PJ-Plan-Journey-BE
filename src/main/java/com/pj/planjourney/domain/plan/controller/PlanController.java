@@ -3,11 +3,13 @@ package com.pj.planjourney.domain.plan.controller;
 import com.pj.planjourney.domain.plan.dto.*;
 import com.pj.planjourney.domain.plan.entity.Plan;
 import com.pj.planjourney.domain.plan.service.PlanService;
+import com.pj.planjourney.global.auth.service.UserDetailsImpl;
 import com.pj.planjourney.global.common.response.ApiResponse;
 import com.pj.planjourney.global.common.response.ApiResponseMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,43 +21,53 @@ public class PlanController {
     private final PlanService planService;
 
     @PostMapping
-    public ApiResponse<CreatePlanResponseDto> savePlan(@RequestHeader("USERID") Long userId,
+    public ApiResponse<CreatePlanResponseDto> savePlan(@AuthenticationPrincipal UserDetailsImpl userDetails,
                                                        @RequestBody CreatePlanRequestDto request) {
+        Long userId = userDetails.getUser().getId();
         CreatePlanResponseDto response = planService.save(userId, request);
-        return new ApiResponse<>(response, ApiResponseMessage.PLAN_DELETED);
+        return new ApiResponse<>(response, ApiResponseMessage.PLAN_CREATED);
     }
 
     @PatchMapping("/{planId}")
-    public ResponseEntity<PlanUpdateTitleResponseDto> updatePlanTitle(@PathVariable Long planId, @RequestBody PlanUpdateTitleRequestDto requestDto) {
+    public ApiResponse<PlanUpdateTitleResponseDto> updatePlanTitle(@PathVariable Long planId, @RequestBody PlanUpdateTitleRequestDto requestDto) {
         PlanUpdateTitleResponseDto responseDto = planService.updatePlanTitle(planId, requestDto);
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        return new ApiResponse<>(responseDto, ApiResponseMessage.PLAN_UPDATE_TITLE);
     }
+
+    // PLAN 상세 보기
     @GetMapping("/{planId}")
-    public ResponseEntity<PlanInfoResponseDto> getPlan(@PathVariable Long planId) {
+    public ApiResponse<PlanInfoResponseDto> getPlan(@PathVariable Long planId) {
         PlanInfoResponseDto responseDto = planService.getPlan(planId);
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        return new ApiResponse<>(responseDto, ApiResponseMessage.SUCCESS);
     }
+
+    // 전체 PLAN 보기
     @GetMapping
-    public ResponseEntity<List<PlanListResponseDto>> getAllPlans() {
+    public ApiResponse<List<PlanListResponseDto>> getAllPlans() {
         List<PlanListResponseDto> responseDto = planService.getAllPlans();
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        return new ApiResponse<>(responseDto, ApiResponseMessage.SUCCESS);
     }
 
+    // PLAN 삭제
     @DeleteMapping("/{planId}")
-    public ResponseEntity<Void> deletePlan(@PathVariable Long planId) {
+    public ApiResponse<Void> deletePlan(@PathVariable Long planId) {
         planService.deletePlan(planId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ApiResponse<>(null, ApiResponseMessage.PLAN_DELETE);
     }
 
+    // PLAN 공개하기?
     @PatchMapping("{planId}/publish")
-    public ResponseEntity<Void> publishPlan(@PathVariable Long planId, @RequestHeader Long userId) {
+    public ApiResponse<Void> publishPlan(@PathVariable Long planId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Long userId = userDetails.getUser().getId();
         planService.publishPlan(planId, userId);
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ApiResponse<>(null, ApiResponseMessage.PLAN_PUBLISH);
     }
 
+    // 다른사람 PLAN을 내 일정으로 가져오기
     @PostMapping("/{planId}")
-    public ResponseEntity<PlanCopyResponseDto> copyPlan(@PathVariable Long planId, @RequestHeader Long userId) {
+    public ApiResponse<PlanCopyResponseDto> copyPlan(@PathVariable Long planId, @AuthenticationPrincipal UserDetailsImpl userDetails) {
+        Long userId = userDetails.getUser().getId();
         PlanCopyResponseDto responseDto = planService.copyPlan(planId, userId);
-        return new ResponseEntity<>(responseDto, HttpStatus.OK);
+        return new ApiResponse<>(responseDto, ApiResponseMessage.PLAN_COPY);
     }
 }

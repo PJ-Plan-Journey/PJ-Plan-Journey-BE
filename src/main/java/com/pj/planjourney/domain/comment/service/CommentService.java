@@ -7,6 +7,8 @@ import com.pj.planjourney.domain.plan.entity.Plan;
 import com.pj.planjourney.domain.plan.repository.PlanRepository;
 import com.pj.planjourney.domain.user.entity.User;
 import com.pj.planjourney.domain.user.repository.UserRepository;
+import com.pj.planjourney.global.common.exception.BusinessLogicException;
+import com.pj.planjourney.global.common.exception.ExceptionCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,9 +24,9 @@ public class CommentService {
 
     public CommentCreateResponseDto createComment(CommentCreateRequestDto requestDto, Long planId, Long userId) {
         Plan plan = planRepository.findById(planId)
-                .orElseThrow(() -> new IllegalArgumentException("Plan not found"));
+                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.PLAN_NOT_FOUND));
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.USER_NOT_FOUND));
 
         Comment comment = new Comment(requestDto, plan, user);
 
@@ -46,10 +48,10 @@ public class CommentService {
         Comment comment = getCommentById(commentId);
 
         if (!comment.getPlan().getId().equals(planId)) {
-            throw new IllegalArgumentException("Plan ID mismatch");
+            throw new BusinessLogicException(ExceptionCode.PLAN_ID_MISMATCH);
         }
         if (!comment.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("User ID mismatch");
+            throw new BusinessLogicException(ExceptionCode.USER_ID_MISMATCH);
         }
         comment.updateComment(requestDto);
         Comment updatedComment = commentRepository.save(comment);
@@ -60,10 +62,10 @@ public class CommentService {
         Comment comment = getCommentById(commentId);
 
         if (!comment.getPlan().getId().equals(planId)) {
-            throw new IllegalArgumentException("Plan ID mismatch");
+            throw new BusinessLogicException(ExceptionCode.PLAN_ID_MISMATCH);
         }
         if (!comment.getUser().getId().equals(userId)) {
-            throw new IllegalArgumentException("User ID mismatch");
+            throw new BusinessLogicException(ExceptionCode.USER_ID_MISMATCH);
         }
         commentRepository.delete(comment);
 
@@ -71,7 +73,7 @@ public class CommentService {
 
     private Comment getCommentById(Long commentId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new IllegalArgumentException("Comment not found"));
+                .orElseThrow(() -> new BusinessLogicException(ExceptionCode.COMMENT_NOT_FOUND));
         return comment;
     }
 }
